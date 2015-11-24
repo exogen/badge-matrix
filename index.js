@@ -81,7 +81,11 @@ app.get("/:user/:repo", function (req, res) {
       failed: "red"
     }[status] || "lightgrey";
     badgeURL = getShieldURL(label, status, color);
-    request.get(badgeURL).pipe(res);
+    req.pipe(request.get(badgeURL)).on('response', function(res) {
+      res.headers['cache-control'] = "public, max-age=30";
+      delete res.headers['expires'];
+      delete res.headers['set-cookie'];
+    }).pipe(res);
   }
 });
 
