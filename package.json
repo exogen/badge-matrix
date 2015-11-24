@@ -1,0 +1,22 @@
+{
+  "name": "travis-matrix",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "engines": {
+    "node": "4.2.1"
+  },
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "author": "Brian Beck",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.13.3",
+    "lru-cache": "^2.7.1",
+    "request": "^2.67.0"
+  },
+  "devDependencies": {
+    "eslint": "^1.10.1"
+  }
+}
