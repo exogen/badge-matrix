@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "engines": {
-    "node": "4.2.1"
+    "node": "4.2.x",
+    "npm": "3.4.x"
   },
   "scripts": {
     "lint": "eslint ."
