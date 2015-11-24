@@ -69,7 +69,9 @@ app.get("/:user/:repo", function (req, res) {
     var status = "unknown";
     data.jobs.forEach(function(job) {
       if (job.config.env && job.config.env.indexOf(envFilter) !== -1) {
-        if (status === "unknown" || status === "passed") {
+        if (status === "unknown" ||
+            status === "passed" ||
+            job.state === "failed") {
           status = job.state;
         }
       }
