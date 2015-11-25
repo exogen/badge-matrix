@@ -1,8 +1,12 @@
 var request = require("request");
 var express = require("express");
+var compression = require("compression");
 var LRU = require("lru-cache");
 
 var app = express();
+app.set('etag', true);
+app.use(compression());
+
 var headers = { Accept: "application/vnd.travis-ci.2+json" };
 var branchCache = LRU({ max: 50, maxAge: 60 * 1000 });
 var buildCache = LRU({ max: 50, maxAge: 60 * 1000 });
@@ -40,7 +44,7 @@ app.get("/:user/:repo", function (req, res) {
     if (err || resp.statusCode >= 400) {
       console.error(err || resp.statusCode);
       badgeURL = getShieldURL(label, "error", "lightgrey");
-      request.get(badgeURL).pipe(res);
+      sendBadge(badgeURL);
       return;
     }
     branchCache.set(branchURL, branchBody);
@@ -61,7 +65,7 @@ app.get("/:user/:repo", function (req, res) {
     if (err || resp.statusCode >= 400) {
       console.error(err || resp.statusCode);
       badgeURL = getShieldURL(label, "error", "lightgrey");
-      request.get(badgeURL).pipe(res);
+      sendBadge(badgeURL);
       return;
     }
     buildCache.set(buildURL, buildBody);
@@ -81,11 +85,15 @@ app.get("/:user/:repo", function (req, res) {
       failed: "red"
     }[status] || "lightgrey";
     badgeURL = getShieldURL(label, status, color);
-    req.pipe(request.get(badgeURL)).on("response", function(res) {
-      res.headers["cache-control"] = "public, must-revalidate, max-age=30";
-      delete res.headers["expires"];
-      delete res.headers["set-cookie"];
-    }).pipe(res);
+    sendBadge(badgeURL);
+  }
+
+  function sendBadge(url) {
+    request.get(url, function(err, resp, body) {
+      res.set("content-type", resp.headers["content-type"]);
+      res.set("cache-control", "public, must-revalidate, max-age=30");
+      res.send(body);
+    });
   }
 });
 
