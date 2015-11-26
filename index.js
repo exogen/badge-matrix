@@ -1,103 +1,142 @@
-var request = require("request");
-var express = require("express");
-var compression = require("compression");
-var LRU = require("lru-cache");
+import express from "express";
+import compression from "compression";
+import nunjucks from "nunjucks";
+import { svgo } from "./middleware";
+import TravisClient from "./travis";
+import SauceClient from "./sauce";
+import getShield from "./shields";
+import getBrowsersLayout from "./browsers";
 
 var app = express();
-app.set('etag', true);
+app.set("etag", true);
 app.use(compression());
+app.use(svgo());
+nunjucks.configure(".", {
+  express: app,
+  trimBlocks: true,
+  lstripBlocks: true,
+  throwOnUndefined: true,
+  noCache: process.env.NODE_ENV !== "production"
+});
 
-var headers = { Accept: "application/vnd.travis-ci.2+json" };
-var branchCache = LRU({ max: 50, maxAge: 60 * 1000 });
-var buildCache = LRU({ max: 50, maxAge: 60 * 1000 });
-
-function escapeShield(str) {
-  return str.replace(/-/g, "--").replace(/_/g, "__");
-}
-
-function getShieldURL(label, status, color) {
-  var badge = [escapeShield(label), escapeShield(status), color].join("-");
-  return "http://img.shields.io/badge/" + badge + ".svg";
-}
-
-app.get("/:user/:repo", function (req, res) {
-  var user = req.params.user;
-  var repo = req.params.repo;
-  var branch = req.query.branch || "master";
-  var envFilter = req.query.env || "";
-  var label = req.query.label || repo;
-  var baseURL = "http://api.travis-ci.org/repos/" + user + "/" + repo;
-  var branchURL = baseURL + "/branches/" + branch;
-  var buildURL;
-
-  var branchBody = branchCache.get(branchURL);
-  if (branchBody) {
-    console.log("branch cache hit: %s", branchURL);
-    handleBranch(null, { statusCode: 200 }, branchBody);
-  } else {
-    console.log("branch cache miss: %s", branchURL);
-    request.get({ url: branchURL, headers: headers }, handleBranch);
+app.get("/sauce/:user", (req, res) => {
+  const user = req.params.user;
+  const build = req.query.build;
+  const filters = {
+    name: req.query.name,
+    tag: req.query.tag
+  };
+  const options = {
+    logos: req.query.logos,
+    labels: req.query.labels,
+    exclude: req.query.exclude,
+    sortBy: req.query.sortBy,
+    versionDivider: req.query.versionDivider
+  };
+  const query = {};
+  if (req.query.from) {
+    query.from = parseInt(req.query.from, 10) || void 0;
   }
-
-  function handleBranch(err, resp, branchBody) {
-    var badgeURL;
-    if (err || resp.statusCode >= 400) {
-      console.error(err || resp.statusCode);
-      badgeURL = getShieldURL(label, "error", "lightgrey");
-      sendBadge(badgeURL);
-      return;
-    }
-    branchCache.set(branchURL, branchBody);
-    var build = JSON.parse(branchBody).branch;
-    buildURL = baseURL + "/builds/" + build.id;
-    var buildBody = buildCache.get(buildURL);
-    if (buildBody) {
-      console.log("build cache hit: %s", buildURL);
-      handleBuild(null, { statusCode: 200 }, buildBody);
+  if (req.query.to) {
+    query.to = parseInt(req.query.to, 10) || void 0;
+  }
+  if (req.query.skip) {
+    query.skip = parseInt(req.query.skip, 10) || void 0;
+  }
+  const sauce = new SauceClient(user);
+  sauce.getBuildJobs(build, query).then((jobs) => {
+    jobs = sauce.filterJobs(jobs, filters);
+    const browsers = sauce.getGroupedBrowsers(jobs);
+    if (browsers.length) {
+      const context = { browsers, options };
+      context.layout = getBrowsersLayout(context);
+      const body = nunjucks.render("browsers.svg", context);
+      const headers = { "content-type": "image/svg+xml" };
+      return { body, headers };
     } else {
-      console.log("build cache miss: %s", buildURL);
-      request.get({ url: buildURL, headers: headers }, handleBuild);
+      return getShield("browsers", "unknown", "lightgrey");
     }
-  }
+  }).catch((err) => {
+    console.error("Error: %s", err);
+    return getShield("browsers", "unknown", "lightgrey");
+  }).then((output) => {
+    res.set("Content-Type", output.headers["content-type"]);
+    res.set("Cache-Control", "public, must-revalidate, max-age=30");
+    res.send(output.body);
+  });
+});
 
-  function handleBuild(err, resp, buildBody) {
-    var badgeURL;
-    if (err || resp.statusCode >= 400) {
-      console.error(err || resp.statusCode);
-      badgeURL = getShieldURL(label, "error", "lightgrey");
-      sendBadge(badgeURL);
-      return;
+// TODO: Make /travis mandatory once migrated off /user/repo/sauce.
+app.get("(/travis)?/:user/:repo/sauce/:sauceUser?", (req, res) => {
+  const user = req.params.user;
+  const repo = req.params.repo;
+  const sauceUser = req.params.sauceUser || user;
+  const branch = req.query.branch || "master";
+  const travis = new TravisClient(user, repo);
+  const sauce = new SauceClient(sauceUser);
+  const filters = {
+    name: req.query.name,
+    tag: req.query.tag
+  };
+  const options = {
+    logos: req.query.logos,
+    labels: req.query.labels,
+    exclude: req.query.exclude,
+    sortBy: req.query.sortBy,
+    versionDivider: req.query.versionDivider
+  };
+  travis.getLatestBranchBuild(branch).then((build) => {
+    return sauce.getTravisBuildJobs(build);
+  }).then((jobs) => {
+    jobs = sauce.filterJobs(jobs, filters);
+    const browsers = sauce.getGroupedBrowsers(jobs);
+    if (browsers.length) {
+      const context = { browsers, options };
+      context.layout = getBrowsersLayout(context);
+      const body = nunjucks.render("browsers.svg", context);
+      const headers = { "content-type": "image/svg+xml" };
+      return { body, headers };
+    } else {
+      return getShield("browsers", "unknown", "lightgrey");
     }
-    buildCache.set(buildURL, buildBody);
-    var data = JSON.parse(buildBody);
-    var status = "unknown";
-    data.jobs.forEach(function(job) {
-      if (job.config.env && job.config.env.indexOf(envFilter) !== -1) {
-        if (status === "unknown" ||
-            status === "passed" ||
-            job.state === "failed") {
-          status = job.state;
-        }
-      }
-    });
-    var color = {
+  }).catch((err) => {
+    console.error("Error: %s", err);
+    return getShield("browsers", "error", "lightgrey");
+  }).then((output) => {
+    res.set("Content-Type", output.headers["content-type"]);
+    res.set("Cache-Control", "public, must-revalidate, max-age=30");
+    res.send(output.body);
+  });
+});
+
+// TODO: Make /travis mandatory once migrated off /user/repo.
+app.get("(/travis)?/:user/:repo", (req, res) => {
+  const branch = req.query.branch || "master";
+  const label = req.query.label || req.params.repo;
+  const filters = {
+    env: req.query.env
+  };
+  const travis = new TravisClient(req.params.user, req.params.repo);
+  travis.getLatestBranchBuild(branch).then((build) => {
+    const jobs = travis.filterJobs(build.jobs, filters);
+    const status = travis.aggregateStatus(jobs);
+    const color = {
       passed: "brightgreen",
       failed: "red"
     }[status] || "lightgrey";
-    badgeURL = getShieldURL(label, status, color);
-    sendBadge(badgeURL);
-  }
-
-  function sendBadge(url) {
-    request.get(url, function(err, resp, body) {
-      res.set("content-type", resp.headers["content-type"]);
-      res.set("cache-control", "public, must-revalidate, max-age=30");
-      res.send(body);
-    });
-  }
+    return getShield(label, status, color);
+  }).catch((err) => {
+    console.error("Error: %s", err);
+    return getShield(label, "error", "lightgrey");
+  }).then((output) => {
+    res.set("Content-Type", output.headers["content-type"]);
+    res.set("Cache-Control", "public, must-revalidate, max-age=30");
+    res.send(output.body);
+  });
 });
 
-var server = app.listen(process.env.PORT || 3000, function() {
+var server = app.listen(process.env.PORT || 3000, () => {
   var port = server.address().port;
+  console.log("NODE_ENV: %s", process.env.NODE_ENV);
   console.log("Listening on port %s", port);
 });
