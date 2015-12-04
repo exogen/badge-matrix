@@ -19,4 +19,4 @@ git push -f heroku deploy:master
 git rm --cached ./Verdana.ttf # Otherwise, switching branches will remove it.
 git checkout - # Switch back to whatever branch we came from.
 git branch -D deploy # Just to prevent someone accidentally pushing to GitHub.
-git stash pop --index # Restore uncommitted changes.
+git stash pop --index || echo # Restore uncommitted changes, OK if none.
