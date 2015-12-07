@@ -1,15 +1,15 @@
 import path from "path";
-import Canvas from "canvas";
+import Canvas, { Font } from "canvas";
 
 // Reference: https://github.com/badges/shields
 const element = new Canvas(0, 0);
 const ctx = element.getContext("2d");
-const CanvasFont = Canvas.Font;
 try {
-  const font = new CanvasFont("Verdana", path.join(__dirname, "Verdana.ttf"));
+  const fontFile = path.join(__dirname, "..", "Verdana.ttf");
+  const font = new Font("Verdana", fontFile);
   ctx.addFont(font);
 } catch(err) {
-  // Do nothing.
+  console.warn(`Failed to add font: ${err}`);
 }
 ctx.font = `11px Verdana, "DejaVu Sans"`;
 

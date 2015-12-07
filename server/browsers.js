@@ -1,5 +1,14 @@
+import path from "path";
 import _ from "lodash";
 import measureTextWidth from "./text";
+import nunjucks from "nunjucks";
+
+nunjucks.configure(path.join(__dirname, ".."), {
+  trimBlocks: true,
+  lstripBlocks: true,
+  throwOnUndefined: true,
+  noCache: process.env.NODE_ENV !== "production"
+});
 
 const BROWSERS = {
   firefox: {
@@ -150,14 +159,14 @@ function getBadgeLayout(browserGroup, options) {
   };
 }
 
-export default function getBrowsersLayout(data) {
+function getBrowsersLayout(context) {
   const layout = {};
-  const options = cleanOptions(data.options);
+  const options = cleanOptions(context.options);
   const shouldInclude = (browserGroup) => {
     return !options.exclude.length ||
       options.exclude.indexOf(browserGroup.browser) === -1;
   };
-  let browsers = data.browsers.filter(shouldInclude);
+  let browsers = context.browsers.filter(shouldInclude);
   // Sort browser list by the `sortBy` option.
   browsers = _.sortBy(browsers, (browserGroup) => {
     const browserInfo = BROWSERS[browserGroup.browser] || {};
@@ -178,4 +187,9 @@ export default function getBrowsersLayout(data) {
   const lastBadge = layout.badges[layout.badges.length - 1];
   layout.width = lastBadge ? (lastBadge.translate + lastBadge.width) : 0;
   return layout;
+}
+
+export default function getBrowsersBadge(context) {
+  const layout = getBrowsersLayout(context);
+  return nunjucks.render("browsers.svg", { ...context, layout });
 }

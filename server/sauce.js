@@ -241,8 +241,10 @@ export default class SauceClient {
         if (browserData.status === "unknown") {
           browserData.status = job.consolidated_status;
         } else {
-          console.log("Skipping %s %s job with error: %s",
-            job.browser, job.browser_short_version, job.error);
+          console.log(`
+            Skipping ${job.browser} ${job.browser_short_version} job with
+            error: ${job.error}
+          `);
         }
       } else if (browserData.status === "unknown" ||
           browserData.status === "passed" ||
