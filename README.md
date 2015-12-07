@@ -29,14 +29,15 @@ Deployed at `https://badges.herokuapp.com/`
 
 * `/sauce/:user`
 
-  **Query parameters**
+  Render browser support matrix badge for the Sauce Labs account at `:user`.
 
-  Job selection options:
+  **Query parameters**
 
   * `build`
 
     Build number, it should match the `build` string of one or more jobs. By
-    default, try to find the most recent build.
+    default, try to find the most recent build. The build can be from any CI
+    service, not just Travis.
 
     Sauce Labs’ API doesn’t allow filtering by build, so finding the jobs for a
     build can be a bit of a hassle:
@@ -68,16 +69,13 @@ Deployed at `https://badges.herokuapp.com/`
   * `skip`
 
     Number of initial jobs to skip. Passed along to the Sauce Labs API.
-
-  Output rendering options:
-
-  * logos
+  * `logos`
 
     How to render browser logos, defaults to **inside**.
 
     * **inside** or **true**: Show logos in the label part of the badge.
     * **none** or **false**: Don’t show logos.
-  * labels
+  * `labels`
 
     How to render browser labels, defaults to **shortName**.
 
@@ -88,7 +86,7 @@ Deployed at `https://badges.herokuapp.com/`
     * **sauceName**: Browser identifiers used by Sauce Labs, e.g.
       "googlechrome", "firefox", "iexplore".
     * **none** or **false**: Don’t show labels.
-  * versionDivider
+  * `versionDivider`
 
     How to render the divider between browser version numbers, defaults to
     **none**.
@@ -97,7 +95,11 @@ Deployed at `https://badges.herokuapp.com/`
     * **line** or **true**: Show a subtle beveled line between version numbers.
 * `/travis/:user/:repo`
 
+  Render build status badge for the Travis project at `:user/:repo`, counting
+  only build jobs that match the given `env` filter.
+
   **Query parameters**
+
   * `branch`
 
     Git branch, defaults to **master**.
@@ -114,47 +116,27 @@ Deployed at `https://badges.herokuapp.com/`
     name.
 * `/travis/:user/:repo/sauce/:sauceUser`
 
-  **Query parameters**
+  Render browser support matrix badge for the Travis project at `:user/:repo`,
+  getting Sauce Labs results from `:sauceUser` (defaults to `:user`).
 
-  Job selection options:
+  You can also use the `/sauce/:user` endpoint, but this way ensures that we
+  only consider Sauce Labs jobs that match up with the latest Travis build
+  number for the given `branch`, and also makes the correct jobs easier to find
+  since Travis provides the time span of the build.
+
+  **Query parameters**
 
   * `branch`
 
     Git branch of the Travis build, defaults to **master**.
   * `name`
 
-    Name filter, it should match a whitespace separated substring in the `name`
-    of one or more Sauce Labs jobs. Only jobs matching the filter will be
-    included in the result.
-  * `tag`
+    `tag`
 
-    Tag filter, it should match a string in the `tags` array of one or more
-    Sauce Labs jobs. Only jobs matching the filter will be included in the
-    result.
+    `logos`
 
-  Output rendering options:
+    `labels`
 
-  * logos
+    `versionDivider`
 
-    How to render browser logos, defaults to **inside**.
-
-    * **inside** or **true**: Show logos in the label part of the badge.
-    * **none** or **false**: Don’t show logos.
-  * labels
-
-    How to render browser labels, defaults to **shortName**.
-
-    * **shortName** or **true**: Short names, e.g. "Chrome", "FF", "IE".
-    * **name**: Medium names, e.g. "Chrome", "Firefox", "Internet Explorer".
-    * **longName**: Long names, e.g. "Google Chrome", "Mozilla Firefox",
-      "Microsoft Internet Explorer".
-    * **sauceName**: Browser identifiers used by Sauce Labs, e.g.
-      "googlechrome", "firefox", "iexplore".
-    * **none** or **false**: Don’t show labels.
-  * versionDivider
-
-    How to render the divider between browser version numbers, defaults to
-    **none**.
-
-    * **none** or **false**: Don’t show a divider.
-    * **line** or **true**: Show a subtle beveled line between version numbers.
+    Same as the `/sauce/:user` endpoint above.
