@@ -6,13 +6,13 @@ export const ONE_MINUTE = 60 * 1000;
 export const ONE_HOUR = 60 * ONE_MINUTE;
 export const ONE_DAY = 24 * ONE_HOUR;
 
-// Cache 50 responses, keyed by URL.
+// Cache 100 responses keyed by URL.
 // Cached values are promises, so that simultaneous hits for the same URL won't
 // make multiple requests. Instead, the request promise is cached immediately so
 // that subsequent requests will get the same instance. Promises will remove
 // themselves from the cache if rejected, so errors won't stick around long.
 // By default, cache for a minute. A hook is provided to alter the TTL.
-const CACHE = LRU({ max: 50, maxAge: ONE_MINUTE });
+const CACHE = LRU({ max: 100, maxAge: ONE_MINUTE });
 
 /**
  * Request `url` with `options` and return a promise that will resolve to the

@@ -47,7 +47,24 @@ function handleSauceBadge(req, res, client, promise) {
   });
 }
 
-// TODO: Make /travis mandatory once migrated off /user/repo.
+app.get("/sauce/:user", (req, res) => {
+  const user = req.params.user;
+  const build = req.query.build; // If undefined, will try to get the latest.
+  const query = {};
+  if (req.query.from) {
+    query.from = parseInt(req.query.from, 10) || void 0;
+  }
+  if (req.query.to) {
+    query.to = parseInt(req.query.to, 10) || void 0;
+  }
+  if (req.query.skip) {
+    query.skip = parseInt(req.query.skip, 10) || void 0;
+  }
+  const sauce = new SauceClient(user);
+  const promise = sauce.getBuildJobs(build, query);
+  return handleSauceBadge(req, res, sauce, promise);
+});
+
 app.get("/travis/:user/:repo", (req, res) => {
   const user = req.params.user;
   const repo = req.params.repo;
@@ -75,7 +92,6 @@ app.get("/travis/:user/:repo", (req, res) => {
   });
 });
 
-// TODO: Make /travis mandatory once migrated off /user/repo/sauce.
 app.get("/travis/:user/:repo/sauce/:sauceUser?", (req, res) => {
   const user = req.params.user;
   const repo = req.params.repo;
@@ -86,24 +102,6 @@ app.get("/travis/:user/:repo/sauce/:sauceUser?", (req, res) => {
   const promise = travis.getLatestBranchBuild(branch).then((build) => {
     return sauce.getTravisBuildJobs(build);
   });
-  return handleSauceBadge(req, res, sauce, promise);
-});
-
-app.get("/sauce/:user", (req, res) => {
-  const user = req.params.user;
-  const build = req.query.build; // If undefined, will try to get the latest.
-  const query = {};
-  if (req.query.from) {
-    query.from = parseInt(req.query.from, 10) || void 0;
-  }
-  if (req.query.to) {
-    query.to = parseInt(req.query.to, 10) || void 0;
-  }
-  if (req.query.skip) {
-    query.skip = parseInt(req.query.skip, 10) || void 0;
-  }
-  const sauce = new SauceClient(user);
-  const promise = sauce.getBuildJobs(build, query);
   return handleSauceBadge(req, res, sauce, promise);
 });
 
