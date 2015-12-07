@@ -2,7 +2,7 @@
   "name": "travis-matrix",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server/index.js",
   "engines": {
     "node": "4.2.x",
     "npm": "3.4.x"
