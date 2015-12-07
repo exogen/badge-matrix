@@ -5,25 +5,27 @@ More advanced badges for your projects using Travis or Sauce Labs.
 ## Badges
 
 #### Status badges for slices of your Travis build matrix
-[![NPM_3=true Status](http://badgematrix.herokuapp.com/travis/FormidableLabs/victory-animation?env=NPM_3=true&label=NPM_3=true)](https://travis-ci.org/FormidableLabs/victory-animation)
-[![NPM_3=false Status](http://badgematrix.herokuapp.com/travis/FormidableLabs/victory-animation?env=NPM_3=false&label=NPM_3=false)](https://travis-ci.org/FormidableLabs/victory-animation)
+[![NPM_3=true Status](http://badges.herokuapp.com/travis/FormidableLabs/victory-animation?env=NPM_3=true&label=NPM_3=true)](https://travis-ci.org/FormidableLabs/victory-animation)
+[![NPM_3=false Status](http://badges.herokuapp.com/travis/FormidableLabs/victory-animation?env=NPM_3=false&label=NPM_3=false)](https://travis-ci.org/FormidableLabs/victory-animation)
 
 #### Browser matrix badges for Sauce Labs
-[![Browser Status](http://badgematrix.herokuapp.com/sauce/script-atomic-onload?name=script-atomic-onload)](https://saucelabs.com/u/script-atomic-onload)
+[![Browser Status](http://badges.herokuapp.com/sauce/script-atomic-onload?name=script-atomic-onload)](https://saucelabs.com/u/script-atomic-onload)
 
 Beautiful *and* customizable!
 
 * `labels=none`
 
-  [![Browser Status](http://badgematrix.herokuapp.com/sauce/script-atomic-onload?name=script-atomic-onload&labels=none)](https://saucelabs.com/u/script-atomic-onload)
+  [![Browser Status](http://badges.herokuapp.com/sauce/script-atomic-onload?name=script-atomic-onload&labels=none)](https://saucelabs.com/u/script-atomic-onload)
 * `logos=none`
 
-  [![Browser Status](http://badgematrix.herokuapp.com/sauce/script-atomic-onload?name=script-atomic-onload&logos=none)](https://saucelabs.com/u/script-atomic-onload)
+  [![Browser Status](http://badges.herokuapp.com/sauce/script-atomic-onload?name=script-atomic-onload&logos=none)](https://saucelabs.com/u/script-atomic-onload)
 * `logos=none&labels=longName`
 
-  [![Browser Status](http://badgematrix.herokuapp.com/sauce/script-atomic-onload?name=script-atomic-onload&logos=none&labels=longName)](https://saucelabs.com/u/script-atomic-onload)
+  [![Browser Status](http://badges.herokuapp.com/sauce/script-atomic-onload?name=script-atomic-onload&logos=none&labels=longName)](https://saucelabs.com/u/script-atomic-onload)
 
 ## Endpoints
+
+Deployed at `http://badges.herokuapp.com/`
 
 * `/sauce/:user`
 
