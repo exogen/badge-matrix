@@ -10,6 +10,12 @@ set -e
 # message is really annoying.
 ./scripts/check-font.sh
 
+# Fail if the `heroku` remote isn't there.
+git remote show heroku
+
+# Necessary for combining the Cairo and Node.js buildpacks.
+heroku buildpacks:set https://github.com/ddollar/heroku-buildpack-multi.git || true
+
 git stash # Stash uncommitted changes.
 git checkout -B deploy # Force branch creation/reset.
 git add -f ./Verdana.ttf # Force add ignored font file.
@@ -19,4 +25,4 @@ git push -f heroku deploy:master
 git rm --cached ./Verdana.ttf # Otherwise, switching branches will remove it.
 git checkout - # Switch back to whatever branch we came from.
 git branch -D deploy # Just to prevent someone accidentally pushing to GitHub.
-git stash pop --index || echo # Restore uncommitted changes, OK if none.
+git stash pop --index || true # Restore uncommitted changes, OK if none.
