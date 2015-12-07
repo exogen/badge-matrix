@@ -16,7 +16,7 @@ npm install
 ```
 
 The file `Verdana.ttf` should ideally exist in the root of the repository
-(it’s used as the default font for measuring text width.) But we can’t
+(it’s used as the default font for measuring text width). But we can’t
 distribute it due to licensing, so you should place the file there yourself.
 A helper command is included:
 
