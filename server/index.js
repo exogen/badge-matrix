@@ -5,6 +5,7 @@ import TravisClient from "./travis";
 import SauceClient from "./sauce";
 import getShieldsBadge from "./shields";
 import getBrowsersBadge from "./browsers";
+import getFileSize from "./size";
 
 var app = express();
 app.set("etag", true);
@@ -103,6 +104,30 @@ app.get("/travis/:user/:repo/sauce/:sauceUser?", (req, res) => {
     return sauce.getTravisBuildJobs(build);
   });
   return handleSauceBadge(req, res, sauce, promise);
+});
+
+app.get("/size/:source/*", (req, res) => {
+  const source = req.params.source;
+  const path = req.params[0];
+  let url;
+  // Express' path-to-regexp business is too insane to easily do this above.
+  if (path.match(/^\w/)) {
+    if (source === "github") {
+      url = `https://raw.githubusercontent.com/${path}`;
+    } else if (source === "npm") {
+      url = `https://npmcdn.com/${path}`;
+    }
+  }
+  const label = "size";
+  getFileSize(url).then((size) => {
+    return getShieldsBadge(label, size, "brightgreen");
+  }).catch(() => {
+    return getShieldsBadge(label, "error", "lightgrey");
+  }).then((body) => {
+    res.set("Content-Type", "image/svg+xml");
+    res.set("Cache-Control", "public, must-revalidate, max-age=30");
+    res.send(body);
+  });
 });
 
 var server = app.listen(process.env.PORT || 3000, () => {

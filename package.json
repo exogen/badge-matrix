@@ -1,7 +1,7 @@
 {
   "name": "travis-matrix",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.1.0",
+  "description": "More advanced badges for your projects using Travis or Sauce Labs.",
   "main": "server/index.js",
   "engines": {
     "node": "4.2.x",
@@ -26,9 +26,11 @@
     "compression": "^1.6.0",
     "express": "^4.13.3",
     "express-interceptor": "^1.1.1",
+    "gzip-size": "^3.0.0",
     "lodash": "^3.10.1",
     "lru-cache": "^2.7.1",
     "nunjucks": "^2.2.0",
+    "pretty-bytes": "^2.0.1",
     "request": "^2.67.0",
     "svgo": "^0.6.1"
   },
@@ -36,5 +38,23 @@
     "babel-eslint": "^4.1.6",
     "eslint": "^1.10.1",
     "nodemon": "^1.8.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/exogen/badge-matrix.git"
+  },
+  "keywords": [
+    "travis",
+    "badge",
+    "badges",
+    "shield",
+    "shields",
+    "matrix",
+    "build",
+    "status"
+  ],
+  "bugs": {
+    "url": "https://github.com/exogen/badge-matrix/issues"
+  },
+  "homepage": "https://github.com/exogen/badge-matrix#readme"
 }

@@ -27,6 +27,27 @@ Beautiful *and* customizable!
 
 Deployed at `https://badges.herokuapp.com/`
 
+* `/size/:source/:path`
+
+  Render a file size badge for any file on GitHub or npm.
+
+  * `:source` can be `github` or `npm`.
+  * `:path` can be any valid `raw.githubusercontent.com` or `npmcdn.com` path
+    (when `:source` is `github` or `npm`, respectively).
+
+  **Query parameters**
+
+  * `gzip`
+
+    Whether to show the gzip-compressed size, defaults to **false**.
+
+    * **true**: Show compressed size.
+    * **false**: Show uncompressed size.
+
+  * `label`
+
+    Custom badge label, by default it will be "size" or "size (gzip)".
+
 * `/sauce/:user`
 
   Render browser support matrix badge for the Sauce Labs account at `:user`.
