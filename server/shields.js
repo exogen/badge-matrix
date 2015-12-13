@@ -5,7 +5,11 @@ function escapeBadge(str) {
 }
 
 export default function getShieldsBadge(label, status, color) {
-  const badge = [escapeBadge(label), escapeBadge(status), color].join("-");
+  const badge = encodeURIComponent([
+    escapeBadge(label),
+    escapeBadge(status),
+    color
+  ].join("-"));
   const url = `https://img.shields.io/badge/${badge}.svg`;
   return cachedRequest(url, { gzip: true }, ONE_HOUR);
 }

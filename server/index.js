@@ -121,7 +121,7 @@ app.get("/size/:source/*", (req, res) => {
       url = `https://npmcdn.com/${path}`;
     }
   }
-  const label = options.gzip ? "size (gzip)" : "size";
+  const label = req.query.label || (options.gzip ? "size (gzip)" : "size");
   getFileSize(url, options).then((size) => {
     return getShieldsBadge(label, size, "brightgreen");
   }).catch((err) => {
