@@ -2,25 +2,25 @@
   "name": "travis-matrix",
   "version": "1.1.0",
   "description": "More advanced badges for your projects using Travis or Sauce Labs.",
-  "main": "server/index.js",
+  "main": "lib/index.js",
   "engines": {
     "node": "4.2.x",
     "npm": "3.4.x"
   },
   "scripts": {
     "add-font": "./scripts/add-font.sh",
+    "build": "babel src -d lib",
     "check-font": "./scripts/check-font.sh",
+    "clean": "rimraf lib",
     "deploy": "./scripts/deploy.sh",
     "lint": "eslint .",
-    "start": "babel-node server/index.js",
-    "start-dev": "nodemon --exec babel-node server/index.js"
+    "prepublish": "npm run clean && npm run build",
+    "start": "node lib/index.js",
+    "start-dev": "nodemon --exec babel-node src/index.js"
   },
   "author": "Brian Beck",
   "license": "MIT",
   "dependencies": {
-    "babel-cli": "^6.2.0",
-    "babel-preset-es2015": "^6.1.18",
-    "babel-preset-stage-2": "^6.1.18",
     "bluebird": "^3.0.5",
     "canvas": "^1.3.4",
     "compression": "^1.6.0",
@@ -35,7 +35,10 @@
     "svgo": "^0.6.1"
   },
   "devDependencies": {
+    "babel-cli": "^6.2.0",
     "babel-eslint": "^4.1.6",
+    "babel-preset-es2015": "^6.1.18",
+    "babel-preset-stage-2": "^6.1.18",
     "eslint": "^1.10.1",
     "nodemon": "^1.8.1"
   },
