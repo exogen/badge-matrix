@@ -25,7 +25,8 @@ export default class TravisClient {
     const url = this.getURL(path, query);
     const options = {
       headers: { Accept: "application/vnd.travis-ci.2+json" },
-      json: true
+      json: true,
+      gzip: true
     };
     return cachedRequest(url, options, customTTL);
   }

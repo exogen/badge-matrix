@@ -24,7 +24,7 @@ export default class SauceClient {
 
   get(path, query, customTTL) {
     const url = this.getURL(path, query);
-    const options = { json: true };
+    const options = { json: true, gzip: true };
     return cachedRequest(url, options, customTTL);
   }
 

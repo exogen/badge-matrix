@@ -16,14 +16,18 @@ const CACHE = LRU({ max: 100, maxAge: ONE_MINUTE });
 
 /**
  * Request `url` with `options` and return a promise that will resolve to the
- * response body. `options` are passed along to the `request` library.
- * If `customTTL` is specified, it can be number or function that returns a
- * different cache `maxAge` than the default. This is useful for deciding that
- * responses containing fresh/in-progress results should have a lower TTL, and
- * responses containing old/complete results a higher TTL.
+ * response body (or the headers, if `options.method` is "HEAD"). `options` are
+ * passed along to the `request` library. If `customTTL` is specified, it can
+ * be a number or function that returns a different cache `maxAge` than the
+ * default. This is useful for deciding that responses containing
+ * fresh/in-progress results should have a lower TTL, and responses containing
+ * old/complete results a higher TTL.
  */
 export default function cachedRequest(url, options, customTTL) {
-  let promise = CACHE.get(url);
+  const method = options.method || "GET";
+  const key = `${method}:${url}`;
+  const resolveHeaders = method === "HEAD";
+  let promise = CACHE.get(key);
   if (promise) {
     console.log(`Cache hit: ${url}`);
     return promise;
@@ -34,32 +38,34 @@ export default function cachedRequest(url, options, customTTL) {
       if (err || response.statusCode >= 400) {
         reject(err || response.statusCode);
       } else {
-        resolve(body);
+        resolve(resolveHeaders ? response.headers : body);
       }
     });
   });
   // Give the caller an opportunity to change the `maxAge` of the cached item.
   if (typeof customTTL === "function") {
     // Use the default TTL for now...
-    CACHE.set(url, promise);
-    promise.then((body) => {
+    CACHE.set(key, promise);
+    promise.then((bodyOrHeaders) => {
       // Only adjust if the cached promise is still the same one.
-      if (CACHE.peek(url) === promise) {
-        const maxAge = customTTL(body);
+      if (CACHE.peek(key) === promise) {
+        const maxAge = customTTL(bodyOrHeaders);
         if (maxAge != null) {
           console.log(`Cache TTL changed to ${maxAge}: ${url}`);
           // `lru-cache` turns 0 into the default; not what we want.
           if (maxAge > 0) {
-            CACHE.set(url, promise, maxAge);
+            CACHE.set(key, promise, maxAge);
           } else {
-            CACHE.del(url);
+            CACHE.del(key);
           }
         }
       }
     });
+  // `customTTL` can also be a number; undefined will use the default.
+  } else if (customTTL === 0) {
+    CACHE.del(key);
   } else {
-    // `customTTL` can also be a number; undefined will use the default.
-    CACHE.set(url, promise, customTTL);
+    CACHE.set(key, promise, customTTL);
   }
   // Return the original promise and not the one from this `catch`; otherwise
   // downstream consumers will never know there was an error (unless we rethrow
@@ -67,9 +73,9 @@ export default function cachedRequest(url, options, customTTL) {
   promise.catch(() => {
     // Remove this rejected promise from the cache so that a new request for
     // `url` can be made immediately.
-    if (CACHE.peek(url) === promise) {
+    if (CACHE.peek(key) === promise) {
       console.log(`Rejected, removing from cache: ${url}`);
-      CACHE.del(url);
+      CACHE.del(key);
     }
   });
   return promise;

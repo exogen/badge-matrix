@@ -109,6 +109,9 @@ app.get("/travis/:user/:repo/sauce/:sauceUser?", (req, res) => {
 app.get("/size/:source/*", (req, res) => {
   const source = req.params.source;
   const path = req.params[0];
+  const options = {
+    gzip: req.query.gzip === "true"
+  };
   let url;
   // Express' path-to-regexp business is too insane to easily do this above.
   if (path.match(/^\w/)) {
@@ -118,10 +121,11 @@ app.get("/size/:source/*", (req, res) => {
       url = `https://npmcdn.com/${path}`;
     }
   }
-  const label = "size";
-  getFileSize(url).then((size) => {
+  const label = options.gzip ? "size (gzip)" : "size";
+  getFileSize(url, options).then((size) => {
     return getShieldsBadge(label, size, "brightgreen");
-  }).catch(() => {
+  }).catch((err) => {
+    console.error(`Error: ${err}`);
     return getShieldsBadge(label, "error", "lightgrey");
   }).then((body) => {
     res.set("Content-Type", "image/svg+xml");
