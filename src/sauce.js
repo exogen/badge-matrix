@@ -158,20 +158,21 @@ export default class SauceClient {
     // `build.build`, they don't represent the total time span of the build.
     // We need to take all job start/finish times into account, and use the
     // min/max extent.
-    const startTimes = [
+    const startTimestamp = _.chain([
       build.build.started_at,
-      ...build.jobs.map(job => job.started_at).filter(time => time)
-    ];
-    const endTimes = [
+      ...build.jobs.map(job => job.started_at)
+    ]).filter().sort().first().value();
+
+    const endTimestamp = _.chain([
       build.build.finished_at,
-      ...build.jobs.map(job => job.finished_at).filter(time => time)
-    ];
+      ...build.jobs.map(job => job.finished_at)
+    ]).filter().sort().last().value();
+
     // We gotta have a start time in there, right? // TODO: Find out.
-    const startTime = new Date(startTimes.sort()[0]);
+    const startTime = new Date(startTimestamp);
     // Build might not have an end time if it's in progress; if that's the
     // case, use the current time.
-    const endTime = endTimes.length ?
-      new Date(endTimes.sort().reverse()[0]) : new Date();
+    const endTime = endTimestamp ? new Date(endTimestamp) : new Date();
     // Travis and SauceLabs will probably have time differences, since it takes
     // time for them to connect and chat, and the services might have different
     // clock skew. So widen the query window by +/- 60 seconds.

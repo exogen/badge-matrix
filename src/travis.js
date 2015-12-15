@@ -32,19 +32,7 @@ export default class TravisClient {
   }
 
   getBranch(branch = "master") {
-    function customTTL(body) {
-      if (body.branch.finished_at && body.commit.committed_at) {
-        const now = Date.now();
-        const finishTime = Date.parse(body.branch.finished_at);
-        const commitTime = Date.parse(body.commit.committed_at);
-        if ((now - finishTime) > ONE_DAY && (now - commitTime) > ONE_DAY) {
-          // Both the build results and the commit are more than a day old.
-          // Cache longer than normal.
-          return ONE_HOUR;
-        }
-      }
-    }
-    return this.get(`/branches/${branch}`, null, customTTL).then((body) => {
+    return this.get(`/branches/${branch}`).then((body) => {
       return body.branch;
     });
   }

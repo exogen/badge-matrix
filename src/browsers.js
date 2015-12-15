@@ -32,6 +32,13 @@ const BROWSERS = {
     longName: "Microsoft Internet Explorer",
     logo: "#iexplore"
   },
+  iphone: {
+    sauceName: "iphone",
+    name: "Mobile Safari",
+    shortName: "iPhone",
+    longName: "Mobile Safari",
+    logo: "#safari"
+  },
   microsoftedge: {
     sauceName: "microsoftedge",
     name: "Microsoft Edge",
@@ -122,7 +129,8 @@ function getBadgeLayout(browserGroup, options) {
   const browserInfo = BROWSERS[browserGroup.browser] || {};
   label.translate = 0;
   label.logo = options.logos === "none" ? null : browserInfo.logo;
-  label.text = options.labels === "none" ? "" : browserInfo[options.labels];
+  label.text = options.labels === "none" ?
+    "" : (browserInfo[options.labels] || browserGroup.browser);
   const logoWidth = label.logo ? (14 + (label.text ? 4 : 0)) : 0;
   const textWidth = label.text ? measureTextWidth(label.text) : 0;
   const paddingLeft = (textWidth || logoWidth) ? 6 : 0;
