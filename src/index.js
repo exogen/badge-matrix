@@ -109,6 +109,7 @@ app.get("/travis/:user/:repo/sauce/:sauceUser?", (req, res) => {
 app.get("/size/:source/*", (req, res) => {
   const source = req.params.source;
   const path = req.params[0];
+  const color = req.query.color || "brightgreen";
   const options = {
     gzip: req.query.gzip === "true"
   };
@@ -123,7 +124,7 @@ app.get("/size/:source/*", (req, res) => {
   }
   const label = req.query.label || (options.gzip ? "size (gzip)" : "size");
   getFileSize(url, options).then((size) => {
-    return getShieldsBadge(label, size, "brightgreen");
+    return getShieldsBadge(label, size, color);
   }).catch((err) => {
     console.error(`Error: ${err}`);
     return getShieldsBadge(label, "error", "lightgrey");
