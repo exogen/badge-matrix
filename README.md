@@ -4,24 +4,31 @@ More advanced badges for your projects using Travis or Sauce Labs.
 
 ## Badges
 
+### File size badges for any file on GitHub or npm
+
+[![Builder package.json size](https://badges.herokuapp.com/size/github/FormidableLabs/builder/master/package.json)](https://github.com)
+
+[![Victory size](https://badges.herokuapp.com/size/npm/victory/dist/victory.min.js?gzip=true)](https://www.npmjs.com/package/victory)
+
+
 #### Status badges for slices of your Travis build matrix
-[![NPM_3=true Status](https://badges.herokuapp.com/travis/FormidableLabs/victory-animation?env=NPM_3=true&label=NPM_3=true)](https://travis-ci.org/FormidableLabs/victory-animation)
-[![NPM_3=false Status](https://badges.herokuapp.com/travis/FormidableLabs/victory-animation?env=NPM_3=false&label=NPM_3=false)](https://travis-ci.org/FormidableLabs/victory-animation)
+[![NPM_3=true Status](https://badges.herokuapp.com/travis/FormidableLabs/builder?env=NPM_3=true&label=NPM_3=true)](https://travis-ci.org/FormidableLabs/builder)
+[![NPM_3=false Status](https://badges.herokuapp.com/travis/FormidableLabs/builder?env=NPM_3=false&label=NPM_3=false)](https://travis-ci.org/FormidableLabs/builder)
 
 #### Browser matrix badges for Sauce Labs
-[![Browser Status](https://badges.herokuapp.com/sauce/script-atomic-onload?name=script-atomic-onload)](https://saucelabs.com/u/script-atomic-onload)
+[![Browser Status](https://badges.herokuapp.com/sauce/wml-little-loader)](https://saucelabs.com/u/wml-little-loader)
 
 Beautiful *and* customizable!
 
 * `labels=none`
 
-  [![Browser Status](https://badges.herokuapp.com/sauce/script-atomic-onload?name=script-atomic-onload&labels=none)](https://saucelabs.com/u/script-atomic-onload)
+  [![Browser Status](https://badges.herokuapp.com/sauce/wml-little-loader?labels=none)](https://saucelabs.com/u/wml-little-loader)
 * `logos=none`
 
-  [![Browser Status](https://badges.herokuapp.com/sauce/script-atomic-onload?name=script-atomic-onload&logos=none)](https://saucelabs.com/u/script-atomic-onload)
+  [![Browser Status](https://badges.herokuapp.com/sauce/wml-little-loader?logos=none)](https://saucelabs.com/u/wml-little-loader)
 * `logos=none&labels=longName`
 
-  [![Browser Status](https://badges.herokuapp.com/sauce/script-atomic-onload?name=script-atomic-onload&logos=none&labels=longName)](https://saucelabs.com/u/script-atomic-onload)
+  [![Browser Status](https://badges.herokuapp.com/sauce/wml-little-loader?logos=none&labels=longName)](https://saucelabs.com/u/wml-little-loader)
 
 ## Endpoints
 
