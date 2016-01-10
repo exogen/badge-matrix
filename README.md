@@ -6,7 +6,7 @@ More advanced badges for your projects using Travis or Sauce Labs.
 
 #### File size badges for any file on GitHub or npm
 
-[![Builder package.json size](https://badges.herokuapp.com/size/github/FormidableLabs/builder/master/package.json)](https://github.com)
+[![Builder package.json size](https://badges.herokuapp.com/size/github/FormidableLabs/builder/master/package.json)](https://github.com/FormidableLabs/builder)
 
 [![Victory size](https://badges.herokuapp.com/size/npm/victory/dist/victory.min.js?gzip=true)](https://www.npmjs.com/package/victory)
 
