@@ -54,6 +54,13 @@ Deployed at `https://badges.herokuapp.com/`
   * `label`
 
     Custom badge label, by default it will be "size" or "size (gzip)".
+    
+  * `color`
+  
+    Color name or value to pass along to [shields.io](http://shields.io/),
+    defaults to **brightgreen**. Note that the default may change to **blue** in
+    the future, as is somewhat conventional for purely informational,
+    non-qualitative badges like this one.
 
 * `/sauce/:user`
 
