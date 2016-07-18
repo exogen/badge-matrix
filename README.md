@@ -30,10 +30,52 @@ Beautiful *and* customizable!
 
   [![Browser Status](https://badges.herokuapp.com/sauce/wml-little-loader?logos=none&labels=longName)](https://saucelabs.com/u/wml-little-loader)
 
-## Endpoints
+## Web Service
 
 Deployed at `https://badges.herokuapp.com/`
 
+### Endpoints
+
+* `/browsers`
+
+  Render browser matrix badge based on support specified in the query
+  parameters, for cases where your testing is done with a service other than
+  Sauce Labs (otherwise use the `/sauce` endpoint).
+
+  **Query parameters**
+
+  * `android`
+
+    `firefox`
+
+    `googlechrome`
+
+    `iexplore`
+
+    `iphone`
+
+    `microsoftedge`
+
+    `opera`
+
+    `safari`
+
+    A comma-separated list of version numbers that were tested for the given
+    browser, e.g. `firefox=20,26`.
+
+    Prefix a version number to indicate status:
+
+    * **`+`** or no prefix: Passed.
+    * **`-`**: Failed.
+    * **`!`**: Error.
+
+  * `logos`
+
+    `labels`
+
+    `versionDivider`
+
+    Same as the `/sauce/:user` endpoint below.
 * `/size/:source/:path`
 
   Render a file size badge for any file on GitHub or npm.
@@ -54,14 +96,13 @@ Deployed at `https://badges.herokuapp.com/`
   * `label`
 
     Custom badge label, by default it will be "size" or "size (gzip)".
-    
+
   * `color`
-  
+
     Color name or value to pass along to [shields.io](http://shields.io/),
     defaults to **brightgreen**. Note that the default may change to **blue** in
     the future, as is somewhat conventional for purely informational,
     non-qualitative badges like this one.
-
 * `/sauce/:user`
 
   Render browser support matrix badge for the Sauce Labs account at `:user`.
