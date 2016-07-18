@@ -11,7 +11,7 @@ try {
 } catch(err) {
   console.warn(`Failed to add font: ${err}`);
 }
-ctx.font = `11px Verdana, "DejaVu Sans"`;
+ctx.font = "11px Verdana, \"DejaVu Sans\"";
 
 export default function measureTextWidth(text) {
   return ctx.measureText(text).width | 0;
