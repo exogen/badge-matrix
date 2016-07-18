@@ -30,6 +30,12 @@ Beautiful *and* customizable!
 
   [![Browser Status](https://badges.herokuapp.com/sauce/wml-little-loader?logos=none&labels=longName)](https://saucelabs.com/u/wml-little-loader)
 
+#### Browser matrix badges for any service, just construct a URL!
+
+* `browsers?firefox=20,26&iexplore=!8,-9,10`
+
+![Browser Status](https://badges.herokuapp.com/badges?firefox=20,26&iexplore=!8,-9,10)
+
 ## Web Service
 
 Deployed at `https://badges.herokuapp.com/`
