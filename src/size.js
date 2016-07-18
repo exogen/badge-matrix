@@ -20,7 +20,19 @@ export default function getFileSize(url, options = {}) {
       } else {
         console.log("No Content-Length in HEAD response; fetching body.");
         return cachedRequest(url, { gzip: true }, ONE_HOUR).then((body) => {
-          return options.gzip ? gzipSize.sync(body) : body.length;
+          if (options.gzip) {
+            return new Promise((resolve, reject) => {
+              gzipSize(body, (err, size) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(size);
+                }
+              });
+            });
+          } else {
+            return body.length;
+          }
         });
       }
     }).then(prettyBytes);
