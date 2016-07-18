@@ -56,6 +56,10 @@ function handleSauceBadge(req, res, client, jobs) {
   return handleBrowsersBadge(req, res, browsers);
 }
 
+app.get("/", (req, res) => {
+  res.redirect("https://github.com/exogen/badge-matrix");
+});
+
 app.get("/sauce/:user", (req, res) => {
   const user = req.params.user;
   const build = req.query.build; // If undefined, will try to get the latest.
