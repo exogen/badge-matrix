@@ -1,6 +1,6 @@
 {
   "name": "travis-matrix",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "More advanced badges for your projects using Travis or Sauce Labs.",
   "main": "lib/index.js",
   "engines": {
