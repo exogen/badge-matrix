@@ -16,7 +16,7 @@
     "lint": "eslint src",
     "prepublish": "npm run clean && npm run build",
     "start": "node lib/index.js",
-    "start-dev": "nodemon --exec babel-node src/index.js"
+    "start:dev": "nodemon --exec babel-node src/index.js"
   },
   "author": "Brian Beck",
   "license": "MIT",
