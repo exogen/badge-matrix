@@ -153,7 +153,7 @@ app.get("/browsers", (req, res) => {
       }
       let status = {
         "!": "error",
-        "-": "failed"
+        "-": "failed",
         "+": "passed"
       }[version.charAt(0)];
       if (status) {
