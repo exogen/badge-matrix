@@ -1,10 +1,11 @@
+import _ from "lodash";
 import express from "express";
 import compression from "compression";
 import { svgo } from "./middleware";
 import TravisClient from "./travis";
 import SauceClient from "./sauce";
 import getShieldsBadge from "./shields";
-import getBrowsersBadge from "./browsers";
+import getBrowsersBadge, { BROWSERS, getGroupedBrowsers } from "./browsers";
 import getFileSize from "./size";
 
 var app = express();
@@ -12,20 +13,8 @@ app.set("etag", true);
 app.use(compression());
 app.use(svgo());
 
-/**
- * Helper for sending an SVG response given a promise of SauceLabs jobs.
- * Need this because there are two handlers that have a lot of overlap:
- * - /sauce/:user - Get jobs for any build (regardless of CI service).
- * - /travis/:user/:repo/sauce - Get jobs for a Travis build.
- */
-function handleSauceBadge(req, res, client, promise) {
-  return promise.then((jobs) => {
-    const filters = {
-      name: req.query.name,
-      tag: req.query.tag
-    };
-    jobs = client.filterJobs(jobs, filters);
-    const browsers = client.getGroupedBrowsers(jobs);
+function handleBrowsersBadge(req, res, browsers) {
+  Promise.resolve(browsers).then((browsers) => {
     if (browsers.length) {
       const options = {
         logos: req.query.logos,
@@ -48,6 +37,25 @@ function handleSauceBadge(req, res, client, promise) {
   });
 }
 
+/**
+ * Helper for sending an SVG response given a promise of SauceLabs jobs.
+ * Need this because there are two handlers that have a lot of overlap:
+ * - /sauce/:user - Get jobs for any build (regardless of CI service).
+ * - /travis/:user/:repo/sauce - Get jobs for a Travis build.
+ */
+function handleSauceBadge(req, res, client, jobs) {
+  const browsers = Promise.resolve(jobs).then((jobs) => {
+    const filters = {
+      name: req.query.name,
+      tag: req.query.tag
+    };
+    jobs = client.filterJobs(jobs, filters);
+    const browsers = client.aggregateBrowsers(jobs);
+    return getGroupedBrowsers(browsers);
+  });
+  return handleBrowsersBadge(req, res, browsers);
+}
+
 app.get("/sauce/:user", (req, res) => {
   const user = req.params.user;
   const build = req.query.build; // If undefined, will try to get the latest.
@@ -62,8 +70,8 @@ app.get("/sauce/:user", (req, res) => {
     query.skip = parseInt(req.query.skip, 10) || void 0;
   }
   const sauce = new SauceClient(user);
-  const promise = sauce.getBuildJobs(build, query);
-  return handleSauceBadge(req, res, sauce, promise);
+  const jobs = sauce.getBuildJobs(build, query);
+  return handleSauceBadge(req, res, sauce, jobs);
 });
 
 app.get("/travis/:user/:repo", (req, res) => {
@@ -133,6 +141,38 @@ app.get("/size/:source/*", (req, res) => {
     res.set("Cache-Control", "public, must-revalidate, max-age=30");
     res.send(body);
   });
+});
+
+app.get("/browsers", (req, res) => {
+  let browsers = {};
+  _.forEach(BROWSERS, (value, browser) => {
+    const versionNumbers = (req.query[browser] || "").split(",");
+    versionNumbers.reduce((browsers, version) => {
+      if (!version) {
+        return browsers;
+      }
+      let status = {
+        "!": "error",
+        "-": "failed"
+        "+": "passed"
+      }[version.charAt(0)];
+      if (status) {
+        version = version.slice(1);
+      } else {
+        status = "passed";
+      }
+      const versions = browsers[browser] = browsers[browser] || {};
+      const browserData = versions[version] = versions[version] || {
+        browser,
+        version,
+        status: "unknown"
+      };
+      browserData.status = status;
+      return browsers;
+    }, browsers);
+  });
+  browsers = getGroupedBrowsers(browsers);
+  handleBrowsersBadge(req, res, browsers);
 });
 
 var server = app.listen(process.env.PORT || 3000, () => {

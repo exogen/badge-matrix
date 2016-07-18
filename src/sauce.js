@@ -262,24 +262,6 @@ export default class SauceClient {
       return browsers;
     }, {});
   }
-
-  /**
-   * Like `aggregateBrowsers`, but instead of nested objects, return an array
-   * where each browser is an object containing `versions`, a sorted array of
-   * results for each of that browser's versions.
-   */
-  getGroupedBrowsers(jobs) {
-    const browsers = this.aggregateBrowsers(jobs);
-    return _.map(browsers, (versions, key) => {
-      return {
-        browser: key,
-        versions: _.sortBy(versions, (browser, version) => {
-          const versionNumber = parseFloat(version);
-          return isNaN(versionNumber) ? version : versionNumber;
-        })
-      };
-    });
-  }
 }
 
 if (require.main === module) {
@@ -293,7 +275,7 @@ if (require.main === module) {
     jobs = sauce.filterJobs(jobs, { name: "loads-js" });
     console.log(`Found ${jobs.length} job(s).`);
     console.log(`Build: ${jobs.length ? jobs[0].build : null}`);
-    const browsers = sauce.getGroupedBrowsers(jobs);
+    const browsers = sauce.aggregateBrowsers(jobs);
     console.log(JSON.stringify(browsers, null, 2));
   }).catch(onError);
   */
@@ -301,7 +283,7 @@ if (require.main === module) {
   travis.getLatestBranchBuild().then((build) => {
     return sauce.getTravisBuildJobs(build).then((jobs) => {
       jobs = sauce.filterJobs(jobs, { name: "requirejs" });
-      const browsers = sauce.getGroupedBrowsers(jobs);
+      const browsers = sauce.aggregateBrowsers(jobs);
       console.log(JSON.stringify(browsers, null, 2));
     });
   }).catch(onError);

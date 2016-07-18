@@ -10,7 +10,14 @@ nunjucks.configure(path.join(__dirname, ".."), {
   noCache: process.env.NODE_ENV !== "production"
 });
 
-const BROWSERS = {
+export const BROWSERS = {
+  android: {
+    sauceName: "android",
+    name: "Android",
+    shortName: "Android",
+    longName: "Android Browser",
+    logo: "#android"
+  },
   firefox: {
     sauceName: "firefox",
     name: "Firefox",
@@ -122,6 +129,18 @@ function cleanOptions(options = {}) {
     cleaned.exclude = [];
   }
   return cleaned;
+}
+
+export function getGroupedBrowsers(browsers) {
+  return _.map(browsers, (versions, key) => {
+    return {
+      browser: key,
+      versions: _.sortBy(versions, (browser, version) => {
+        const versionNumber = parseFloat(version);
+        return isNaN(versionNumber) ? version : versionNumber;
+      })
+    };
+  });
 }
 
 function getBadgeLayout(browserGroup, options) {
