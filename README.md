@@ -34,7 +34,7 @@ Beautiful *and* customizable!
 
 * `browsers?firefox=20,26&iexplore=!8,-9,10`
 
-![Browser Status](https://badges.herokuapp.com/badges?firefox=20,26&iexplore=!8,-9,10)
+![Browser Status](https://badges.herokuapp.com/browsers?firefox=20,26&iexplore=!8,-9,10)
 
 ## Web Service
 
