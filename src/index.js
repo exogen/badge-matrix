@@ -1,185 +1,216 @@
-import _ from "lodash";
-import express from "express";
-import compression from "compression";
-import { svgo } from "./middleware";
-import TravisClient from "./travis";
-import SauceClient from "./sauce";
-import getShieldsBadge from "./shields";
-import getBrowsersBadge, { BROWSERS, getGroupedBrowsers } from "./browsers";
-import getFileSize from "./size";
+import throng from "throng";
 
-var app = express();
-app.set("etag", true);
-app.use(compression());
-app.use(svgo());
+const WORKERS = process.env.WEB_CONCURRENCY || 1;
+const PORT = process.env.PORT || 3000;
 
-function handleBrowsersBadge(req, res, browsers) {
-  Promise.resolve(browsers).then((browsers) => {
-    if (browsers.length) {
-      const options = {
-        logos: req.query.logos,
-        labels: req.query.labels,
-        exclude: req.query.exclude,
-        sortBy: req.query.sortBy,
-        versionDivider: req.query.versionDivider
-      };
-      return getBrowsersBadge({ browsers, options });
-    } else {
-      return getShieldsBadge("browsers", "unknown", "lightgrey");
-    }
-  }).catch((err) => {
-    console.error(`Error: ${err}`);
-    return getShieldsBadge("browsers", "unknown", "lightgrey");
-  }).then((body) => {
-    res.set("Content-Type", "image/svg+xml");
-    res.set("Cache-Control", "public, must-revalidate, max-age=30");
-    res.send(body);
-  });
-}
+function start(id) {
+  console.log(`Started worker ${id}.`);
 
-/**
- * Helper for sending an SVG response given a promise of SauceLabs jobs.
- * Need this because there are two handlers that have a lot of overlap:
- * - /sauce/:user - Get jobs for any build (regardless of CI service).
- * - /travis/:user/:repo/sauce - Get jobs for a Travis build.
- */
-function handleSauceBadge(req, res, client, jobs) {
-  const browsers = Promise.resolve(jobs).then((jobs) => {
-    const filters = {
-      name: req.query.name,
-      tag: req.query.tag
-    };
-    jobs = client.filterJobs(jobs, filters);
-    const browsers = client.aggregateBrowsers(jobs);
-    return getGroupedBrowsers(browsers);
-  });
-  return handleBrowsersBadge(req, res, browsers);
-}
+  const _ = require("lodash");
+  const express = require("express");
+  const compression = require("compression");
+  const TravisClient = require("./travis").default;
+  const SauceClient = require("./sauce").default;
+  const getShieldsBadge = require("./shields").default;
+  const { default: getBrowsersBadge, BROWSERS, getGroupedBrowsers } = require("./browsers");
+  const getFileSize = require("./size").default;
 
-app.get("/", (req, res) => {
-  res.redirect("https://github.com/exogen/badge-matrix");
-});
+  const app = express();
+  app.set("etag", true);
+  app.use(compression());
 
-app.get("/sauce/:user", (req, res) => {
-  const user = req.params.user;
-  const build = req.query.build; // If undefined, will try to get the latest.
-  const query = {};
-  if (req.query.from) {
-    query.from = parseInt(req.query.from, 10) || void 0;
-  }
-  if (req.query.to) {
-    query.to = parseInt(req.query.to, 10) || void 0;
-  }
-  if (req.query.skip) {
-    query.skip = parseInt(req.query.skip, 10) || void 0;
-  }
-  const sauce = new SauceClient(user);
-  const jobs = sauce.getBuildJobs(build, query);
-  return handleSauceBadge(req, res, sauce, jobs);
-});
-
-app.get("/travis/:user/:repo", (req, res) => {
-  const user = req.params.user;
-  const repo = req.params.repo;
-  const branch = req.query.branch || "master";
-  const label = req.query.label || req.params.repo;
-  const travis = new TravisClient(user, repo);
-  travis.getLatestBranchBuild(branch).then((build) => {
-    const filters = {
-      env: req.query.env
-    };
-    const jobs = travis.filterJobs(build.jobs, filters);
-    const status = travis.aggregateStatus(jobs);
-    const color = {
-      passed: "brightgreen",
-      failed: "red"
-    }[status] || "lightgrey";
-    return getShieldsBadge(label, status, color);
-  }).catch((err) => {
-    console.error(`Error: ${err}`);
-    return getShieldsBadge(label, "error", "lightgrey");
-  }).then((body) => {
-    res.set("Content-Type", "image/svg+xml");
-    res.set("Cache-Control", "public, must-revalidate, max-age=30");
-    res.send(body);
-  });
-});
-
-app.get("/travis/:user/:repo/sauce/:sauceUser?", (req, res) => {
-  const user = req.params.user;
-  const repo = req.params.repo;
-  const sauceUser = req.params.sauceUser || user;
-  const branch = req.query.branch || "master";
-  const travis = new TravisClient(user, repo);
-  const sauce = new SauceClient(sauceUser);
-  const promise = travis.getLatestBranchBuild(branch).then((build) => {
-    return sauce.getTravisBuildJobs(build);
-  });
-  return handleSauceBadge(req, res, sauce, promise);
-});
-
-app.get("/size/:source/*", (req, res) => {
-  const source = req.params.source;
-  const path = req.params[0];
-  const color = req.query.color || "brightgreen";
-  const options = {
-    gzip: req.query.gzip === "true"
-  };
-  let url;
-  // Express' path-to-regexp business is too insane to easily do this above.
-  if (path.match(/^\w/)) {
-    if (source === "github") {
-      url = `https://raw.githubusercontent.com/${path}`;
-    } else if (source === "npm") {
-      url = `https://npmcdn.com/${path}`;
-    }
-  }
-  const label = req.query.label || (options.gzip ? "size (gzip)" : "size");
-  getFileSize(url, options).then((size) => {
-    return getShieldsBadge(label, size, color);
-  }).catch((err) => {
-    console.error(`Error: ${err}`);
-    return getShieldsBadge(label, "error", "lightgrey");
-  }).then((body) => {
-    res.set("Content-Type", "image/svg+xml");
-    res.set("Cache-Control", "public, must-revalidate, max-age=30");
-    res.send(body);
-  });
-});
-
-app.get("/browsers", (req, res) => {
-  let browsers = {};
-  _.forEach(BROWSERS, (value, browser) => {
-    const versionNumbers = (req.query[browser] || "").split(",");
-    versionNumbers.reduce((browsers, version) => {
-      if (!version) {
-        return browsers;
-      }
-      let status = {
-        "!": "error",
-        "-": "failed",
-        "+": "passed"
-      }[version.charAt(0)];
-      if (status) {
-        version = version.slice(1);
+  function handleBrowsersBadge(req, res, browsers) {
+    Promise.resolve(browsers).then((browsers) => {
+      if (browsers.length) {
+        const options = {
+          logos: req.query.logos,
+          labels: req.query.labels,
+          exclude: req.query.exclude,
+          sortBy: req.query.sortBy,
+          versionDivider: req.query.versionDivider
+        };
+        return getBrowsersBadge({ browsers, options });
       } else {
-        status = "passed";
+        return getShieldsBadge("browsers", "unknown", "lightgrey");
       }
-      const versions = browsers[browser] = browsers[browser] || {};
-      const browserData = versions[version] = versions[version] || {
-        browser,
-        version,
-        status: "unknown"
-      };
-      browserData.status = status;
-      return browsers;
-    }, browsers);
-  });
-  browsers = getGroupedBrowsers(browsers);
-  handleBrowsersBadge(req, res, browsers);
-});
+    }).catch((err) => {
+      console.error(`Error: ${err}`);
+      return getShieldsBadge("browsers", "unknown", "lightgrey");
+    }).then((body) => {
+      res.write(body);
+      res.end();
+    });
+  }
 
-var server = app.listen(process.env.PORT || 3000, () => {
-  var port = server.address().port;
-  console.log(`Listening on port ${port}`);
-});
+  /**
+   * Helper for sending an SVG response given a promise of SauceLabs jobs.
+   * Need this because there are two handlers that have a lot of overlap:
+   * - /sauce/:user - Get jobs for any build (regardless of CI service).
+   * - /travis/:user/:repo/sauce - Get jobs for a Travis build.
+   */
+  function handleSauceBadge(req, res, client, jobs) {
+    const browsers = Promise.resolve(jobs).then((jobs) => {
+      const filters = {
+        name: req.query.name,
+        tag: req.query.tag
+      };
+      jobs = client.filterJobs(jobs, filters);
+      const browsers = client.aggregateBrowsers(jobs);
+      return getGroupedBrowsers(browsers);
+    });
+    return handleBrowsersBadge(req, res, browsers);
+  }
+
+  app.get("/", (req, res) => {
+    res.redirect("https://github.com/exogen/badge-matrix");
+  });
+
+  app.get("/sauce/:user", (req, res) => {
+    res.status(200);
+    res.set("Content-Type", "image/svg+xml");
+    res.set("Cache-Control", "public, must-revalidate, max-age=30");
+    res.flushHeaders();
+
+    const user = req.params.user;
+    const build = req.query.build; // If undefined, will try to get the latest.
+    const query = {};
+    if (req.query.from) {
+      query.from = parseInt(req.query.from, 10) || void 0;
+    }
+    if (req.query.to) {
+      query.to = parseInt(req.query.to, 10) || void 0;
+    }
+    if (req.query.skip) {
+      query.skip = parseInt(req.query.skip, 10) || void 0;
+    }
+    const sauce = new SauceClient(user);
+    const jobs = sauce.getBuildJobs(build, query);
+    return handleSauceBadge(req, res, sauce, jobs);
+  });
+
+  app.get("/travis/:user/:repo", (req, res) => {
+    res.status(200);
+    res.set("Content-Type", "image/svg+xml");
+    res.set("Cache-Control", "public, must-revalidate, max-age=30");
+    res.flushHeaders();
+
+    const user = req.params.user;
+    const repo = req.params.repo;
+    const branch = req.query.branch || "master";
+    const label = req.query.label || req.params.repo;
+    const travis = new TravisClient(user, repo);
+    travis.getLatestBranchBuild(branch).then((build) => {
+      const filters = {
+        env: req.query.env
+      };
+      const jobs = travis.filterJobs(build.jobs, filters);
+      const status = travis.aggregateStatus(jobs);
+      const color = {
+        passed: "brightgreen",
+        failed: "red"
+      }[status] || "lightgrey";
+      return getShieldsBadge(label, status, color);
+    }).catch((err) => {
+      console.error(`Error: ${err}`);
+      return getShieldsBadge(label, "error", "lightgrey");
+    }).then((body) => {
+      res.write(body);
+      res.end();
+    });
+  });
+
+  app.get("/travis/:user/:repo/sauce/:sauceUser?", (req, res) => {
+    res.status(200);
+    res.set("Content-Type", "image/svg+xml");
+    res.set("Cache-Control", "public, must-revalidate, max-age=30");
+    res.flushHeaders();
+
+    const user = req.params.user;
+    const repo = req.params.repo;
+    const sauceUser = req.params.sauceUser || user;
+    const branch = req.query.branch || "master";
+    const travis = new TravisClient(user, repo);
+    const sauce = new SauceClient(sauceUser);
+    const promise = travis.getLatestBranchBuild(branch).then((build) => {
+      return sauce.getTravisBuildJobs(build);
+    });
+    return handleSauceBadge(req, res, sauce, promise);
+  });
+
+  app.get("/size/:source/*", (req, res) => {
+    res.status(200);
+    res.set("Content-Type", "image/svg+xml");
+    res.set("Cache-Control", "public, must-revalidate, max-age=30");
+    res.flushHeaders();
+
+    const source = req.params.source;
+    const path = req.params[0];
+    const color = req.query.color || "brightgreen";
+    const options = {
+      gzip: req.query.gzip === "true"
+    };
+    let url;
+    // Express' path-to-regexp business is too insane to easily do this above.
+    if (path.match(/^\w/)) {
+      if (source === "github") {
+        url = `https://raw.githubusercontent.com/${path}`;
+      } else if (source === "npm") {
+        url = `https://npmcdn.com/${path}`;
+      }
+    }
+    const label = req.query.label || (options.gzip ? "size (gzip)" : "size");
+    getFileSize(url, options).then((size) => {
+      return getShieldsBadge(label, size, color);
+    }).catch((err) => {
+      console.error(`Error: ${err}`);
+      return getShieldsBadge(label, "error", "lightgrey");
+    }).then((body) => {
+      res.write(body);
+      res.end();
+    });
+  });
+
+  app.get("/browsers", (req, res) => {
+    res.status(200);
+    res.set("Content-Type", "image/svg+xml");
+    res.set("Cache-Control", "public, must-revalidate, max-age=30");
+    res.flushHeaders();
+
+    let browsers = {};
+    _.forEach(BROWSERS, (value, browser) => {
+      const versionNumbers = (req.query[browser] || "").split(",");
+      versionNumbers.reduce((browsers, version) => {
+        if (!version) {
+          return browsers;
+        }
+        let status = {
+          "!": "error",
+          "-": "failed",
+          "+": "passed"
+        }[version.charAt(0)];
+        if (status) {
+          version = version.slice(1);
+        } else {
+          status = "passed";
+        }
+        const versions = browsers[browser] = browsers[browser] || {};
+        const browserData = versions[version] = versions[version] || {
+          browser,
+          version,
+          status: "unknown"
+        };
+        browserData.status = status;
+        return browsers;
+      }, browsers);
+    });
+    browsers = getGroupedBrowsers(browsers);
+    handleBrowsersBadge(req, res, browsers);
+  });
+
+  const server = app.listen(PORT, () => {
+    const port = server.address().port;
+    console.log(`Listening on port ${port}`);
+  });
+}
+
+throng({ start, workers: WORKERS, lifetime: Infinity });

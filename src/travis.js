@@ -1,5 +1,8 @@
 import querystring from "querystring";
+import LRU from "lru-cache";
 import cachedRequest, { ONE_HOUR, ONE_DAY } from "./cached-request";
+
+const BRANCH_CACHE = LRU({ max: 256, maxAge: 30 * ONE_DAY });
 
 export default class TravisClient {
   constructor(user, repo) {
@@ -62,8 +65,24 @@ export default class TravisClient {
   }
 
   getLatestBranchBuild(branch = "master") {
+    // Branch prediction, in both senses of the word 'branch'...
+    // Optimistically fetch the last known build for this branch in parallel
+    // with the branch itself. If it's still the same, then we'll have already
+    // fetched the build we need. If not, no biggie, we just made an extra
+    // parallel request and now the new build ID is cached for next time.
+    const key = `${this.user}/${this.repo}/${branch}`;
+    const cachedBranchID = BRANCH_CACHE.get(key);
+    let cachedBranch;
+    if (cachedBranchID != null) {
+      cachedBranch = this.getBuild(cachedBranchID);
+    }
     return this.getBranch(branch).then((branch) => {
-      return this.getBuild(branch.id);
+      if (cachedBranch && branch.id === cachedBranchID) {
+        return cachedBranch;
+      } else {
+        BRANCH_CACHE.set(key, branch.id);
+        return this.getBuild(branch.id);
+      }
     });
   }
 

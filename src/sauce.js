@@ -1,7 +1,7 @@
 import querystring from "querystring";
-import cachedRequest, { ONE_HOUR, ONE_DAY } from "./cached-request";
 import _ from "lodash";
 import TravisClient from "./travis";
+import cachedRequest, { ONE_HOUR, ONE_DAY } from "./cached-request";
 
 export default class SauceClient {
   constructor(user) {
@@ -59,7 +59,7 @@ export default class SauceClient {
     const seenIDs = {};
     const allJobs = [];
     let skip = query.skip || 0;
-    const limit = query.limit || 200;
+    const limit = query.limit || 500;
     const getMoreJobs = () => {
       query = { ...query, skip, limit };
       return this.get("/jobs", query, customTTL).then((jobs) => {
