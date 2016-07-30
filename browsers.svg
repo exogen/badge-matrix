@@ -1,14 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{{ layout.width }}" height="20">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width=data.layout.width height="20">
   <defs>
     <linearGradient id="smooth" x2="0" y2="100%">
       <stop offset="0" stop-color="#bbb" stop-opacity="0.1"/>
       <stop offset="1" stop-opacity="0.1"/>
     </linearGradient>
-    {% for badge in layout.badges %}
-    <mask id="mask-{{ loop.index }}">
-      <rect width="{{ badge.width }}" height="20" rx="3" fill="#fff"/>
+    <mask for(badge in data.layout.badges | status-var=loop) id="mask-${ loop.getIndex() }">
+      <rect width=badge.width height="20" rx="3" fill="#fff"/>
     </mask>
-    {% endfor %}
     <!-- Browser icons from Font Awesome by Dave Gandy -->
     <!-- http://fontawesome.io via http://icomoon.io -->
     <symbol id="android" viewBox="0 0 512 512">
@@ -34,39 +32,35 @@
     </symbol>
   </defs>
   <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
-    {% for badge in layout.badges %}
-    <g transform="translate({{ badge.translate }}, 0)" mask="url(#mask-{{ loop.index }})">
-      <g transform="translate({{ badge.label.translate }}, 0)">
-        <rect width="{{ badge.label.width }}" height="20" fill="#555"/>
-        <rect width="{{ badge.label.width }}" height="20" fill="url(#smooth)"/>
-        {% if badge.label.logo %}
-        <use xlink:href="{{ badge.label.logo }}" x="5" y="4" width="14" height="14" style="fill: #010101; fill-opacity: 0.3"/>
-        <use xlink:href="{{ badge.label.logo }}" x="5" y="3" width="14" height="14" style="fill: #bbb"/>
-        {% endif %}
-        {% if badge.label.text %}
-        <text x="{{ badge.label.x }}" y="15" fill="#010101" fill-opacity="0.3">{{ badge.label.text }}</text>
-        <text x="{{ badge.label.x }}" y="14">{{ badge.label.text }}</text>
-        {% endif %}
+    <g for(badge in data.layout.badges | status-var=loop) transform="translate(${ badge.translate }, 0)" mask="url(#mask-${ loop.getIndex() })">
+      <g transform="translate(${ badge.label.translate }, 0)">
+        <rect width=badge.label.width height="20" fill="#555"/>
+        <rect width=badge.label.width height="20" fill="url(#smooth)"/>
+        <if(badge.label.logo)>
+          <use xlink:href=badge.label.logo x="5" y="4" width="14" height="14" style="fill: #010101; fill-opacity: 0.3"/>
+          <use xlink:href=badge.label.logo x="5" y="3" width="14" height="14" style="fill: #bbb"/>
+        </if>
+        <if(badge.label.text)>
+          <text x=badge.label.x y="15" fill="#010101" fill-opacity="0.3">${ badge.label.text }</text>
+          <text x=badge.label.x y="14">${ badge.label.text }</text>
+        </if>
       </g>
-      {% for browser in badge.versions %}
-      <g transform="translate({{ browser.translate }}, 0)">
-        <rect width="{{ browser.width }}" height="20" fill="{{ browser.fill }}"/>
-        {% if browser.divider == "line" %}
-          {% if not loop.first %}
-          <line x1="0.5" x2="0.5" y1="0" y2="20"
-            stroke-width="1" stroke="#fff" stroke-opacity="0.3"/>
-          {% endif %}
-          {% if not loop.last %}
-          <line x1="{{ browser.width - 0.5 }}" x2="{{ browser.width - 0.5 }}" y1="0" y2="20"
-            stroke-width="1" stroke="#010101" stroke-opacity="0.1"/>
-          {% endif %}
-        {% endif %}
-        <rect width="{{ browser.width }}" height="20" fill="url(#smooth)"/>
-        <text x="{{ browser.x }}" y="15" fill="#010101" fill-opacity="0.3">{{ browser.text }}</text>
-        <text x="{{ browser.x }}" y="14">{{ browser.text }}</text>
+      <g for(browser in badge.versions | status-var=loop) transform="translate(${ browser.translate }, 0)">
+        <rect width=browser.width height="20" fill=browser.fill/>
+        <if(browser.divider === "line")>
+          <if(!loop.isFirst())>
+            <line x1="0.5" x2="0.5" y1="0" y2="20"
+              stroke-width="1" stroke="#fff" stroke-opacity="0.3"/>
+          </if>
+          <if(!loop.isLast())>
+            <line x1=browser.width-0.5 x2=browser.width-0.5 y1="0" y2="20"
+              stroke-width="1" stroke="#010101" stroke-opacity="0.1"/>
+          </if>
+        </if>
+        <rect width=browser.width height="20" fill="url(#smooth)"/>
+        <text x=browser.x y="15" fill="#010101" fill-opacity="0.3">${ browser.text }</text>
+        <text x=browser.x y="14">${ browser.text }</text>
       </g>
-      {% endfor %}
     </g>
-    {% endfor %}
   </g>
 </svg>

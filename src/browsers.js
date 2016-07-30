@@ -1,13 +1,9 @@
-import path from "path";
 import _ from "lodash";
 import measureTextWidth from "./text";
-import nunjucks from "nunjucks";
+import marko from "marko";
 
-nunjucks.configure(path.join(__dirname, ".."), {
-  trimBlocks: true,
-  lstripBlocks: true,
-  throwOnUndefined: true,
-  noCache: process.env.NODE_ENV !== "production"
+const template = marko.load(require.resolve("../browsers.svg"), {
+  writeToDisk: false
 });
 
 export const BROWSERS = {
@@ -218,5 +214,5 @@ function getBrowsersLayout(context) {
 
 export default function getBrowsersBadge(context) {
   const layout = getBrowsersLayout(context);
-  return nunjucks.render("browsers.svg", { ...context, layout });
+  return template.renderSync({ ...context, layout });
 }
