@@ -34,7 +34,8 @@
     "pretty-bytes": "^3.0.0",
     "request": "^2.67.0",
     "svgo": "^0.6.1",
-    "throng": "^4.0.0"
+    "throng": "^4.0.0",
+    "xml2js": "^0.4.17"
   },
   "devDependencies": {
     "babel-cli": "^6.2.0",

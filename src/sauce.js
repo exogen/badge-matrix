@@ -1,12 +1,28 @@
 import querystring from "querystring";
 import _ from "lodash";
+import xml2js from "xml2js";
 import TravisClient from "./travis";
 import cachedRequest, { ONE_HOUR, ONE_DAY } from "./cached-request";
+
+const svgBrowsers = {
+  "#chrome": "googlechrome",
+  "#edge": "microsoftedge",
+  "#ie": "iexplore",
+  "#ios": "iphone"
+};
+
+const svgStatus = {
+  "#passing": "passed",
+  "#failing": "failed",
+  "#error": "error",
+  "#unknown": "unknown"
+};
 
 export default class SauceClient {
   constructor(user) {
     this.user = user;
     this.baseURL = `https://saucelabs.com/rest/v1/${user}`;
+    this.svgURL = `https://saucelabs.com/browser-matrix/${user}.svg`;
   }
 
   getURL(path, query) {
@@ -187,7 +203,7 @@ export default class SauceClient {
    * Filter `jobs` and return the result. `filters` supports `tag` and `name`
    * keys for filtering by build tags and build name, respectively. `name` will
    * match if it appears as a word anywhere in the build name.
- */
+   */
   filterJobs(jobs, filters = {}) {
     const { tag, name } = filters;
     const nameRegex = name && new RegExp(`(^| )${name}( |$)`);
@@ -261,6 +277,75 @@ export default class SauceClient {
       }
       return browsers;
     }, {});
+  }
+
+  getSVG() {
+    const options = { gzip: true };
+    return cachedRequest(this.svgURL, options);
+  }
+
+  parseSVG(body) {
+    return new Promise((resolve, reject) => {
+      xml2js.parseString(body, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  aggregateSVGBrowsers(svg) {
+    if (!svg || !svg.svg || !svg.svg.svg || !svg.svg.svg.length) {
+      return {};
+    }
+    const browsers = {};
+    svg.svg.svg.forEach((node) => {
+      const browserAttr = node.use && node.use[0].$["xlink:href"];
+      const versionNodes = node.svg;
+      if (!browserAttr || !versionNodes) {
+        return;
+      }
+      const browser = svgBrowsers[browserAttr] || browserAttr.slice(1);
+      versionNodes.forEach((versionNode) => {
+        if (!versionNode.text || !versionNode.use) {
+          return;
+        }
+        const numberNode = versionNode.text.find((text) => {
+          return text.$["class"] === "browser_version";
+        });
+        if (!numberNode) {
+          return;
+        }
+        const statusNode = versionNode.use.find((use) => {
+          return svgStatus[use.$["xlink:href"]];
+        });
+        if (!statusNode) {
+          return;
+        }
+        const version = numberNode._;
+        const status = svgStatus[statusNode.$["xlink:href"]];
+        const versions = browsers[browser] = browsers[browser] || {};
+        const browserData = versions[version] = versions[version] || {
+          browser,
+          version,
+          status: "unknown"
+        };
+        if (browserData.status === "unknown" ||
+            browserData.status === "passed" ||
+            status === "failed") {
+          browserData.status = status;
+        }
+      });
+    });
+    return browsers;
+  }
+
+  getLatestSVGBrowsers() {
+    return this.getSVG()
+      .then(body => this.parseSVG(body))
+      .then(svg => this.aggregateSVGBrowsers(svg));
   }
 }
 

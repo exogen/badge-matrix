@@ -43,21 +43,27 @@ function start(id) {
   }
 
   /**
-   * Helper for sending an SVG response given a promise of SauceLabs jobs.
-   * Need this because there are two handlers that have a lot of overlap:
+   * Helper for sending an SVG response given a promise of SauceLabs jobs
+   * or a browser-matrix SVG badge to transform. Need this because there are
+   * two handlers that have a lot of overlap:
    * - /sauce/:user - Get jobs for any build (regardless of CI service).
    * - /travis/:user/:repo/sauce - Get jobs for a Travis build.
    */
-  function handleSauceBadge(req, res, client, jobs) {
-    const browsers = Promise.resolve(jobs).then((jobs) => {
-      const filters = {
-        name: req.query.name,
-        tag: req.query.tag
-      };
-      jobs = client.filterJobs(jobs, filters);
-      const browsers = client.aggregateBrowsers(jobs);
-      return getGroupedBrowsers(browsers);
-    });
+  function handleSauceBadge(req, res, client, source, jobs) {
+    let browsers;
+    if (source === "svg") {
+      browsers = client.getLatestSVGBrowsers();
+    } else {
+      browsers = Promise.resolve(jobs).then((jobs) => {
+        const filters = {
+          name: req.query.name,
+          tag: req.query.tag
+        };
+        jobs = client.filterJobs(jobs, filters);
+        return client.aggregateBrowsers(jobs);
+      });
+    }
+    browsers = browsers.then(getGroupedBrowsers);
     return handleBrowsersBadge(req, res, browsers);
   }
 
@@ -72,6 +78,7 @@ function start(id) {
     res.flushHeaders();
 
     const user = req.params.user;
+    let source = req.query.source || "svg";
     const build = req.query.build; // If undefined, will try to get the latest.
     const query = {};
     if (req.query.from) {
@@ -83,9 +90,13 @@ function start(id) {
     if (req.query.skip) {
       query.skip = parseInt(req.query.skip, 10) || void 0;
     }
+    if (build || req.query.name || req.query.tag || req.query.from ||
+        req.query.to || req.query.skip) {
+      source = "api";
+    }
     const sauce = new SauceClient(user);
-    const jobs = sauce.getBuildJobs(build, query);
-    return handleSauceBadge(req, res, sauce, jobs);
+    const jobs = source === "api" ? sauce.getBuildJobs(build, query) : [];
+    return handleSauceBadge(req, res, sauce, source, jobs);
   });
 
   app.get("/travis/:user/:repo", (req, res) => {
@@ -131,10 +142,10 @@ function start(id) {
     const branch = req.query.branch || "master";
     const travis = new TravisClient(user, repo);
     const sauce = new SauceClient(sauceUser);
-    const promise = travis.getLatestBranchBuild(branch).then((build) => {
+    const jobs = travis.getLatestBranchBuild(branch).then((build) => {
       return sauce.getTravisBuildJobs(build);
     });
-    return handleSauceBadge(req, res, sauce, promise);
+    return handleSauceBadge(req, res, sauce, "api", jobs);
   });
 
   app.get("/size/:source/*", (req, res) => {

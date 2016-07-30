@@ -151,6 +151,19 @@ Deployed at `https://badges.herokuapp.com/`
   * `skip`
 
     Number of initial jobs to skip. Passed along to the Sauce Labs API.
+  * `source`
+
+    Data source from which to render results, defaults to `svg`.
+
+    * **api**: Fetch results from the Sauce Labs API. This allows you to specify
+      any of the above query parameters for filtering jobs.
+    * **svg**: Fetch Sauce Labs’ own browser matrix SVG widget and transform it
+      into our slimmer, beautified version. If you aren’t using any of the
+      options above, and just want the same results as their own widget would
+      render, use this. If you try specifying any of the options above, the
+      server will automatically change `source` to `api`. This is probably much
+      faster than talking to the API, but it’s a bit more fragile since their
+      SVG output could change.
   * `logos`
 
     How to render browser logos, defaults to **inside**.
