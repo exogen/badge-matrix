@@ -46,7 +46,8 @@ Deployed at `https://badges.herokuapp.com/`
 
   Render browser matrix badge based on support specified in the query
   parameters, for cases where your testing is done with a service other than
-  Sauce Labs (otherwise use the `/sauce` endpoint).
+  Sauce Labs (otherwise use the `/sauce` endpoint), or you don’t have CI and
+  just want to show your intended support.
 
   **Query parameters**
 
@@ -124,7 +125,7 @@ Deployed at `https://badges.herokuapp.com/`
     Sauce Labs’ API doesn’t allow filtering by build, so finding the jobs for a
     build can be a bit of a hassle:
 
-    * If the requested build is not in the first 200 results returned by the
+    * If the requested build is not in the first 500 results returned by the
       API, then you should specify `from` and `to` to limit the query window
       to the time span of the build.
     * If no `from` is given, then stop fetching more jobs from the API when a
