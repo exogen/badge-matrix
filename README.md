@@ -2,6 +2,8 @@
 
 More advanced badges for your projects using Travis or Sauce Labs.
 
+[See it in action over at the `script-atomic-onload` project.](https://github.com/exogen/script-atomic-onload)
+
 ## Badges
 
 #### File size badges for any file on GitHub or npm
