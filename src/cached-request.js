@@ -1,6 +1,7 @@
 import request from "request";
 import LRU from "lru-cache";
 import hash from "object-hash";
+import humanizeDuration from "humanize-duration";
 
 export const ONE_MINUTE = 60 * 1000;
 export const ONE_HOUR = 60 * ONE_MINUTE;
@@ -51,7 +52,7 @@ export default function cachedRequest(url, options, customTTL) {
       if (CACHE.peek(key) === promise) {
         const maxAge = customTTL(bodyOrHeaders);
         if (maxAge != null) {
-          console.log(`Cache TTL changed to ${maxAge}: ${url}`);
+          console.log(`Cache TTL changed to ${humanizeDuration(maxAge)}: ${url}`);
           // `lru-cache` turns 0 into the default; not what we want.
           if (maxAge > 0) {
             CACHE.set(key, promise, maxAge);
