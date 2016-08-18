@@ -11,5 +11,5 @@ export default function getShieldsBadge(label, status, color) {
     color
   ].join("-"));
   const url = `https://img.shields.io/badge/${badge}.svg`;
-  return cachedRequest(url, { gzip: true }, ONE_DAY);
+  return cachedRequest(url, { gzip: true }, 5 * ONE_DAY);
 }

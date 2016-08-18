@@ -61,7 +61,7 @@ export default class SauceClient {
         if ((now - to) > ONE_DAY) {
           // Querying for jobs that are more than a day old.
           // Cache longer than normal.
-          return ONE_HOUR;
+          return 12 * ONE_HOUR;
         }
       }
     }

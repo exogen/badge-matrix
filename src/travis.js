@@ -57,7 +57,7 @@ export default class TravisClient {
         if (lastFinishTime && (now - lastFinishTime) > ONE_DAY) {
           // Latest job is more than a day old.
           // Cache longer than normal.
-          return ONE_HOUR;
+          return 12 * ONE_HOUR;
         }
       }
     }
