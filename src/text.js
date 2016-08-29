@@ -1,20 +1,18 @@
 import path from "path";
-import Canvas, { Font } from "canvas";
+import PDFDocument from "pdfkit";
 
-// Reference: https://github.com/badges/shields
-const element = new Canvas(0, 0);
-const ctx = element.getContext("2d");
+let doc = new PDFDocument({ size: "A4", layout: "landscape" });
 try {
-  const fontFile = path.join(__dirname, "..", "Verdana.ttf");
-  const font = new Font("Verdana", fontFile);
-  ctx.addFont(font);
-} catch(err) {
-  console.warn(`Failed to add font: ${err}`);
+  doc = doc.font(path.join(__dirname, "..", "Verdana.ttf"));
+} catch (err) {
+  doc = doc.font("Helvetica-Bold");
+  console.warn("Could not load font file 'Verdana.ttf', " +
+               "text widths will therefore be approximate.");
 }
-ctx.font = "11px Verdana, \"DejaVu Sans\"";
+doc = doc.fontSize(11);
 
-export default function measureTextWidth(text) {
-  return ctx.measureText(text).width | 0;
+export default function measureTextWidth(text, rounding = "floor") {
+  return Math[rounding](doc.widthOfString(text));
 }
 
 if (require.main === module) {

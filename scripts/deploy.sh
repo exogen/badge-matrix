@@ -11,10 +11,6 @@ npm run check-font
 # Fail if the `heroku` remote isn't there.
 git remote show heroku
 
-# Combine the Node.js and Cairo buildpacks.
-heroku buildpacks:set https://github.com/mojodna/heroku-buildpack-cairo.git || true
-heroku buildpacks:add heroku/nodejs || true
-
 git stash # Stash uncommitted changes.
 git checkout -B deploy # Force branch creation/reset.
 npm run build

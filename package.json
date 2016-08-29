@@ -4,8 +4,8 @@
   "description": "More advanced badges for your projects using Travis or Sauce Labs.",
   "main": "lib/index.js",
   "engines": {
-    "node": "~6.2.0",
-    "npm": "~3.10.0"
+    "node": "6.5.x",
+    "npm": "3.10.x"
   },
   "scripts": {
     "add-font": "./scripts/add-font.sh",
@@ -22,7 +22,6 @@
   "author": "Brian Beck",
   "license": "MIT",
   "dependencies": {
-    "canvas": "^1.3.4",
     "compression": "^1.6.0",
     "express": "^4.13.3",
     "express-interceptor": "^1.1.1",
@@ -32,6 +31,7 @@
     "lru-cache": "^4.0.1",
     "marko": "^3.8.1",
     "object-hash": "^1.1.3",
+    "pdfkit": "^0.8.0",
     "pretty-bytes": "^3.0.0",
     "request": "^2.67.0",
     "svgo": "^0.6.1",
