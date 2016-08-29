@@ -16,3 +16,15 @@ ctx.font = "11px Verdana, \"DejaVu Sans\"";
 export default function measureTextWidth(text) {
   return ctx.measureText(text).width | 0;
 }
+
+if (require.main === module) {
+  const TEST_STRINGS = [
+    "FF",
+    "Google Chrome",
+    "Microsoft Internet Explorer",
+    "Safari"
+  ];
+  TEST_STRINGS.forEach(str => {
+    console.log(`${str} [${measureTextWidth(str)}]`);
+  });
+}
