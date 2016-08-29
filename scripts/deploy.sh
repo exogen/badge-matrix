@@ -26,3 +26,5 @@ git rm -r --cached Verdana.ttf lib # Otherwise switching branches will remove th
 git checkout - # Switch back to whatever branch we came from.
 git branch -D deploy # Just to prevent someone accidentally pushing to GitHub.
 git stash pop --index || true # Restore uncommitted changes, OK if none.
+
+echo -e "\n\033[0;32m✔︎ Successfully deployed.\033[0m"

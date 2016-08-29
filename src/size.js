@@ -1,4 +1,4 @@
-import cachedRequest, { ONE_HOUR } from "./cached-request";
+import cachedRequest, { ONE_HOUR, ONE_MINUTE } from "./cached-request";
 import prettyBytes from "pretty-bytes";
 import gzipSize from "gzip-size";
 
@@ -10,7 +10,7 @@ export default function getFileSize(url, options = {}) {
     return cachedRequest(url, {
       method: "HEAD",
       gzip: options.gzip
-    }, ONE_HOUR).then((headers) => {
+    }, ONE_MINUTE).then((headers) => {
       let bytes;
       if (!options.gzip || headers["content-encoding"] === "gzip") {
         bytes = headers["content-length"];
