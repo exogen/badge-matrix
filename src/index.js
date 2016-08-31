@@ -166,7 +166,7 @@ function start(id) {
       if (source === "github") {
         url = `https://raw.githubusercontent.com/${path}`;
       } else if (source === "npm") {
-        url = `https://npmcdn.com/${path}`;
+        url = `https://unpkg.com/${path}`;
       }
     }
     const label = req.query.label || (options.gzip ? "size (gzip)" : "size");
