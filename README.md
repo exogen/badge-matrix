@@ -90,7 +90,7 @@ Deployed at `https://badges.herokuapp.com/`
   Render a file size badge for any file on GitHub or npm.
 
   * `:source` can be `github` or `npm`.
-  * `:path` can be any valid `raw.githubusercontent.com` or `npmcdn.com` path
+  * `:path` can be any valid `raw.githubusercontent.com` or `unpkg.com` path
     (when `:source` is `github` or `npm`, respectively).
 
   **Query parameters**
