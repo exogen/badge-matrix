@@ -40,7 +40,17 @@ export default class SauceClient {
 
   get(path, query, customTTL) {
     const url = this.getURL(path, query);
-    const options = { json: true, gzip: true };
+    const options = {
+      json: true,
+      gzip: true,
+      headers: {
+        "X-RateLimit-Enable": "false"
+      },
+      auth: {
+        user: process.env.SAUCE_USERNAME,
+        pass: process.env.SAUCE_ACCESS_KEY
+      }
+    };
     return cachedRequest(url, options, customTTL);
   }
 

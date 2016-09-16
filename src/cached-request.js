@@ -2,6 +2,7 @@ import request from "request";
 import LRU from "lru-cache";
 import hash from "object-hash";
 import humanizeDuration from "humanize-duration";
+import { prettyPrint } from "./util";
 
 export const ONE_MINUTE = 60 * 1000;
 export const ONE_HOUR = 60 * ONE_MINUTE;
@@ -36,8 +37,12 @@ export default function cachedRequest(url, options, customTTL) {
   console.log(`Cache miss: ${url}`);
   promise = new Promise((resolve, reject) => {
     request({ ...options, url }, (err, response, body) => {
-      if (err || response.statusCode >= 400) {
-        reject(err || response.statusCode);
+      if (err) {
+        reject(err);
+      } else if (response.statusCode >= 400) {
+        err = new Error(`HTTP ${response.statusCode}`);
+        err.response = response;
+        reject(err);
       } else {
         resolve(resolveHeaders ? response.headers : body);
       }
@@ -71,9 +76,15 @@ export default function cachedRequest(url, options, customTTL) {
   // Return the original promise and not the one from this `catch`; otherwise
   // downstream consumers will never know there was an error (unless we rethrow
   // here, gross).
-  promise.catch(() => {
+  promise.catch((err) => {
     // Remove this rejected promise from the cache so that a new request for
     // `url` can be made immediately.
+    if (err.response) {
+      console.error(prettyPrint(err.response.headers));
+      console.error(prettyPrint(err.response.body));
+    } else {
+      console.error(prettyPrint(err));
+    }
     if (CACHE.peek(key) === promise) {
       console.log(`Rejected, removing from cache: ${url}`);
       CACHE.del(key);
