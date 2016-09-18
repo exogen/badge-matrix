@@ -35,12 +35,19 @@ export const BROWSERS = {
     longName: 'Microsoft Internet Explorer',
     logo: '#iexplore'
   },
+  ipad: {
+    sauceName: 'ipad',
+    name: 'Safari · iPad',
+    shortName: 'iPad',
+    longName: 'Mobile Safari · iPad',
+    logo: '#ipad'
+  },
   iphone: {
     sauceName: 'iphone',
-    name: 'Mobile Safari',
+    name: 'Safari · iPhone',
     shortName: 'iPhone',
-    longName: 'Mobile Safari',
-    logo: '#safari'
+    longName: 'Mobile Safari · iPhone',
+    logo: '#iphone'
   },
   microsoftedge: {
     sauceName: 'microsoftedge',
