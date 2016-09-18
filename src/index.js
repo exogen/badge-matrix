@@ -1,25 +1,25 @@
-import throng from "throng";
+import throng from 'throng'
 
-const WORKERS = process.env.WEB_CONCURRENCY || 1;
-const PORT = process.env.PORT || 3000;
+const WORKERS = process.env.WEB_CONCURRENCY || 1
+const PORT = process.env.PORT || 3000
 
-function start(id) {
-  console.log(`Started worker ${id}.`);
+function start (id) {
+  console.log(`Started worker ${id}.`)
 
-  const _ = require("lodash");
-  const express = require("express");
-  const compression = require("compression");
-  const TravisClient = require("./travis").default;
-  const SauceClient = require("./sauce").default;
-  const getShieldsBadge = require("./shields").default;
-  const { default: getBrowsersBadge, BROWSERS, getGroupedBrowsers } = require("./browsers");
-  const getFileSize = require("./size").default;
+  const _ = require('lodash')
+  const express = require('express')
+  const compression = require('compression')
+  const TravisClient = require('./travis').default
+  const SauceClient = require('./sauce').default
+  const getShieldsBadge = require('./shields').default
+  const { default: getBrowsersBadge, BROWSERS, getGroupedBrowsers } = require('./browsers')
+  const getFileSize = require('./size').default
 
-  const app = express();
-  app.set("etag", true);
-  app.use(compression());
+  const app = express()
+  app.set('etag', true)
+  app.use(compression())
 
-  function handleBrowsersBadge(req, res, browsers) {
+  function handleBrowsersBadge (req, res, browsers) {
     Promise.resolve(browsers).then((browsers) => {
       if (browsers.length) {
         const options = {
@@ -28,18 +28,18 @@ function start(id) {
           exclude: req.query.exclude,
           sortBy: req.query.sortBy,
           versionDivider: req.query.versionDivider
-        };
-        return getBrowsersBadge({ browsers, options });
+        }
+        return getBrowsersBadge({ browsers, options })
       } else {
-        return getShieldsBadge("browsers", "unknown", "lightgrey");
+        return getShieldsBadge('browsers', 'unknown', 'lightgrey')
       }
     }).catch((err) => {
-      console.error(`Error: ${err}`);
-      return getShieldsBadge("browsers", "unknown", "lightgrey");
+      console.error(`Error: ${err}`)
+      return getShieldsBadge('browsers', 'unknown', 'lightgrey')
     }).then((body) => {
-      res.write(body);
-      res.end();
-    });
+      res.write(body)
+      res.end()
+    })
   }
 
   /**
@@ -49,179 +49,179 @@ function start(id) {
    * - /sauce/:user - Get jobs for any build (regardless of CI service).
    * - /travis/:user/:repo/sauce - Get jobs for a Travis build.
    */
-  function handleSauceBadge(req, res, client, source, jobs) {
-    let browsers;
-    if (source === "svg") {
-      browsers = client.getLatestSVGBrowsers();
+  function handleSauceBadge (req, res, client, source, jobs) {
+    let browsers
+    if (source === 'svg') {
+      browsers = client.getLatestSVGBrowsers()
     } else {
       browsers = Promise.resolve(jobs).then((jobs) => {
         const filters = {
           name: req.query.name,
           tag: req.query.tag
-        };
-        jobs = client.filterJobs(jobs, filters);
-        return client.aggregateBrowsers(jobs);
-      });
+        }
+        jobs = client.filterJobs(jobs, filters)
+        return client.aggregateBrowsers(jobs)
+      })
     }
-    browsers = browsers.then(getGroupedBrowsers);
-    return handleBrowsersBadge(req, res, browsers);
+    browsers = browsers.then(getGroupedBrowsers)
+    return handleBrowsersBadge(req, res, browsers)
   }
 
-  app.get("/", (req, res) => {
-    res.redirect("https://github.com/exogen/badge-matrix");
-  });
+  app.get('/', (req, res) => {
+    res.redirect('https://github.com/exogen/badge-matrix')
+  })
 
-  app.get("/sauce/:user", (req, res) => {
-    res.status(200);
-    res.set("Content-Type", "image/svg+xml");
-    res.set("Cache-Control", "public, must-revalidate, max-age=30");
-    res.flushHeaders();
+  app.get('/sauce/:user', (req, res) => {
+    res.status(200)
+    res.set('Content-Type', 'image/svg+xml')
+    res.set('Cache-Control', 'public, must-revalidate, max-age=30')
+    res.flushHeaders()
 
-    const user = req.params.user;
-    let source = req.query.source || "svg";
-    const build = req.query.build; // If undefined, will try to get the latest.
-    const query = {};
+    const user = req.params.user
+    let source = req.query.source || 'svg'
+    const build = req.query.build // If undefined, will try to get the latest.
+    const query = {}
     if (req.query.from) {
-      query.from = parseInt(req.query.from, 10) || void 0;
+      query.from = parseInt(req.query.from, 10) || void 0
     }
     if (req.query.to) {
-      query.to = parseInt(req.query.to, 10) || void 0;
+      query.to = parseInt(req.query.to, 10) || void 0
     }
     if (req.query.skip) {
-      query.skip = parseInt(req.query.skip, 10) || void 0;
+      query.skip = parseInt(req.query.skip, 10) || void 0
     }
     if (build || req.query.name || req.query.tag || req.query.from ||
         req.query.to || req.query.skip) {
-      source = "api";
+      source = 'api'
     }
-    const sauce = new SauceClient(user);
-    const jobs = source === "api" ? sauce.getBuildJobs(build, query) : [];
-    return handleSauceBadge(req, res, sauce, source, jobs);
-  });
+    const sauce = new SauceClient(user)
+    const jobs = source === 'api' ? sauce.getBuildJobs(build, query) : []
+    return handleSauceBadge(req, res, sauce, source, jobs)
+  })
 
-  app.get("/travis/:user/:repo", (req, res) => {
-    res.status(200);
-    res.set("Content-Type", "image/svg+xml");
-    res.set("Cache-Control", "public, must-revalidate, max-age=30");
-    res.flushHeaders();
+  app.get('/travis/:user/:repo', (req, res) => {
+    res.status(200)
+    res.set('Content-Type', 'image/svg+xml')
+    res.set('Cache-Control', 'public, must-revalidate, max-age=30')
+    res.flushHeaders()
 
-    const user = req.params.user;
-    const repo = req.params.repo;
-    const branch = req.query.branch || "master";
-    const label = req.query.label || req.params.repo;
-    const travis = new TravisClient(user, repo);
+    const user = req.params.user
+    const repo = req.params.repo
+    const branch = req.query.branch || 'master'
+    const label = req.query.label || req.params.repo
+    const travis = new TravisClient(user, repo)
     travis.getLatestBranchBuild(branch).then((build) => {
       const filters = {
         env: req.query.env
-      };
-      const jobs = travis.filterJobs(build.jobs, filters);
-      const status = travis.aggregateStatus(jobs);
+      }
+      const jobs = travis.filterJobs(build.jobs, filters)
+      const status = travis.aggregateStatus(jobs)
       const color = {
-        passed: "brightgreen",
-        failed: "red"
-      }[status] || "lightgrey";
-      return getShieldsBadge(label, status, color);
+        passed: 'brightgreen',
+        failed: 'red'
+      }[status] || 'lightgrey'
+      return getShieldsBadge(label, status, color)
     }).catch((err) => {
-      console.error(`Error: ${err}`);
-      return getShieldsBadge(label, "error", "lightgrey");
+      console.error(`Error: ${err}`)
+      return getShieldsBadge(label, 'error', 'lightgrey')
     }).then((body) => {
-      res.write(body);
-      res.end();
-    });
-  });
+      res.write(body)
+      res.end()
+    })
+  })
 
-  app.get("/travis/:user/:repo/sauce/:sauceUser?", (req, res) => {
-    res.status(200);
-    res.set("Content-Type", "image/svg+xml");
-    res.set("Cache-Control", "public, must-revalidate, max-age=30");
-    res.flushHeaders();
+  app.get('/travis/:user/:repo/sauce/:sauceUser?', (req, res) => {
+    res.status(200)
+    res.set('Content-Type', 'image/svg+xml')
+    res.set('Cache-Control', 'public, must-revalidate, max-age=30')
+    res.flushHeaders()
 
-    const user = req.params.user;
-    const repo = req.params.repo;
-    const sauceUser = req.params.sauceUser || user;
-    const branch = req.query.branch || "master";
-    const travis = new TravisClient(user, repo);
-    const sauce = new SauceClient(sauceUser);
+    const user = req.params.user
+    const repo = req.params.repo
+    const sauceUser = req.params.sauceUser || user
+    const branch = req.query.branch || 'master'
+    const travis = new TravisClient(user, repo)
+    const sauce = new SauceClient(sauceUser)
     const jobs = travis.getLatestBranchBuild(branch).then((build) => {
-      return sauce.getTravisBuildJobs(build);
-    });
-    return handleSauceBadge(req, res, sauce, "api", jobs);
-  });
+      return sauce.getTravisBuildJobs(build)
+    })
+    return handleSauceBadge(req, res, sauce, 'api', jobs)
+  })
 
-  app.get("/size/:source/*", (req, res) => {
-    res.status(200);
-    res.set("Content-Type", "image/svg+xml");
-    res.set("Cache-Control", "public, must-revalidate, max-age=30");
-    res.flushHeaders();
+  app.get('/size/:source/*', (req, res) => {
+    res.status(200)
+    res.set('Content-Type', 'image/svg+xml')
+    res.set('Cache-Control', 'public, must-revalidate, max-age=30')
+    res.flushHeaders()
 
-    const source = req.params.source;
-    const path = req.params[0];
-    const color = req.query.color || "brightgreen";
+    const source = req.params.source
+    const path = req.params[0]
+    const color = req.query.color || 'brightgreen'
     const options = {
-      gzip: req.query.gzip === "true"
-    };
-    let url;
+      gzip: req.query.gzip === 'true'
+    }
+    let url
     // Express' path-to-regexp business is too insane to easily do this above.
     if (path.match(/^\w/)) {
-      if (source === "github") {
-        url = `https://raw.githubusercontent.com/${path}`;
-      } else if (source === "npm") {
-        url = `https://unpkg.com/${path}`;
+      if (source === 'github') {
+        url = `https://raw.githubusercontent.com/${path}`
+      } else if (source === 'npm') {
+        url = `https://unpkg.com/${path}`
       }
     }
-    const label = req.query.label || (options.gzip ? "size (gzip)" : "size");
+    const label = req.query.label || (options.gzip ? 'size (gzip)' : 'size')
     getFileSize(url, options).then((size) => {
-      return getShieldsBadge(label, size, color);
+      return getShieldsBadge(label, size, color)
     }).catch((err) => {
-      console.error(`Error: ${err}`);
-      return getShieldsBadge(label, "error", "lightgrey");
+      console.error(`Error: ${err}`)
+      return getShieldsBadge(label, 'error', 'lightgrey')
     }).then((body) => {
-      res.write(body);
-      res.end();
-    });
-  });
+      res.write(body)
+      res.end()
+    })
+  })
 
-  app.get("/browsers", (req, res) => {
-    res.status(200);
-    res.set("Content-Type", "image/svg+xml");
-    res.set("Cache-Control", "public, must-revalidate, max-age=30");
-    res.flushHeaders();
+  app.get('/browsers', (req, res) => {
+    res.status(200)
+    res.set('Content-Type', 'image/svg+xml')
+    res.set('Cache-Control', 'public, must-revalidate, max-age=30')
+    res.flushHeaders()
 
-    let browsers = {};
+    let browsers = {}
     _.forEach(BROWSERS, (value, browser) => {
-      const versionNumbers = (req.query[browser] || "").split(",");
+      const versionNumbers = (req.query[browser] || '').split(',')
       versionNumbers.reduce((browsers, version) => {
         if (!version) {
-          return browsers;
+          return browsers
         }
         let status = {
-          "!": "error",
-          "-": "failed",
-          "+": "passed"
-        }[version.charAt(0)];
+          '!': 'error',
+          '-': 'failed',
+          '+': 'passed'
+        }[version.charAt(0)]
         if (status) {
-          version = version.slice(1);
+          version = version.slice(1)
         } else {
-          status = "passed";
+          status = 'passed'
         }
-        const versions = browsers[browser] = browsers[browser] || {};
+        const versions = browsers[browser] = browsers[browser] || {}
         const browserData = versions[version] = versions[version] || {
           browser,
           version,
-          status: "unknown"
-        };
-        browserData.status = status;
-        return browsers;
-      }, browsers);
-    });
-    browsers = getGroupedBrowsers(browsers);
-    handleBrowsersBadge(req, res, browsers);
-  });
+          status: 'unknown'
+        }
+        browserData.status = status
+        return browsers
+      }, browsers)
+    })
+    browsers = getGroupedBrowsers(browsers)
+    handleBrowsersBadge(req, res, browsers)
+  })
 
   const server = app.listen(PORT, () => {
-    const port = server.address().port;
-    console.log(`Listening on port ${port}`);
-  });
+    const port = server.address().port
+    console.log(`Listening on port ${port}`)
+  })
 }
 
-throng({ start, workers: WORKERS, lifetime: Infinity });
+throng({ start, workers: WORKERS, lifetime: Infinity })
