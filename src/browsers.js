@@ -116,6 +116,11 @@ const VERSION_DIVIDER_OPTIONS = {
   false: 'none'
 }
 
+const STYLE_OPTIONS = {
+  flat: 'flat',
+  'flat-square': 'flat-square'
+}
+
 function cleanOptions (options = {}) {
   const cleaned = {}
   cleaned.logos = LOGOS_OPTIONS[options.logos] || 'inside'
@@ -124,6 +129,7 @@ function cleanOptions (options = {}) {
     (cleaned.labels === 'none' ? 'name' : cleaned.labels)
   cleaned.versionDivider = VERSION_DIVIDER_OPTIONS[options.versionDivider] ||
     'none'
+  cleaned.style = STYLE_OPTIONS[options.style] || 'flat'
   if (Array.isArray(options.exclude)) {
     cleaned.exclude = options.exclude
   } else if (typeof options.exclude === 'string') {
@@ -192,6 +198,7 @@ function getBadgeLayout (browserGroup, options) {
 function getBrowsersLayout (context) {
   const layout = {}
   const options = cleanOptions(context.options)
+  layout.style = options.style
   const shouldInclude = (browserGroup) => {
     return !options.exclude.length ||
       options.exclude.indexOf(browserGroup.browser) === -1
