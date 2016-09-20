@@ -9,17 +9,18 @@ function start (id) {
   const _ = require('lodash')
   const express = require('express')
   const compression = require('compression')
-  const TravisClient = require('./travis').default
-  const SauceClient = require('./sauce').default
-  const getShieldsBadge = require('./shields').default
+  const { default: TravisClient } = require('./travis')
+  const { default: SauceClient } = require('./sauce')
+  const { default: getShieldsBadge } = require('./shields')
   const { default: getBrowsersBadge, BROWSERS, getGroupedBrowsers } = require('./browsers')
-  const getFileSize = require('./size').default
+  const { default: getFileSize } = require('./size')
 
   const app = express()
   app.set('etag', true)
   app.use(compression())
 
   function handleBrowsersBadge (req, res, browsers) {
+    const query = { style: req.query.style }
     Promise.resolve(browsers).then((browsers) => {
       if (browsers.length) {
         const options = {
@@ -27,15 +28,16 @@ function start (id) {
           labels: req.query.labels,
           exclude: req.query.exclude,
           sortBy: req.query.sortBy,
-          versionDivider: req.query.versionDivider
+          versionDivider: req.query.versionDivider,
+          ...query
         }
         return getBrowsersBadge({ browsers, options })
       } else {
-        return getShieldsBadge('browsers', 'unknown', 'lightgrey')
+        return getShieldsBadge('browsers', 'unknown', 'lightgrey', query)
       }
     }).catch((err) => {
       console.error(`Error: ${err}`)
-      return getShieldsBadge('browsers', 'unknown', 'lightgrey')
+      return getShieldsBadge('browsers', 'unknown', 'lightgrey', query)
     }).then((body) => {
       res.write(body)
       res.end()
@@ -110,6 +112,7 @@ function start (id) {
     const branch = req.query.branch || 'master'
     const label = req.query.label || req.params.repo
     const travis = new TravisClient(user, repo)
+    const query = { style: req.query.style }
     travis.getLatestBranchBuild(branch).then((build) => {
       const filters = {
         env: req.query.env
@@ -120,10 +123,10 @@ function start (id) {
         passed: 'brightgreen',
         failed: 'red'
       }[status] || 'lightgrey'
-      return getShieldsBadge(label, status, color)
+      return getShieldsBadge(label, status, color, query)
     }).catch((err) => {
       console.error(`Error: ${err}`)
-      return getShieldsBadge(label, 'error', 'lightgrey')
+      return getShieldsBadge(label, 'error', 'lightgrey', query)
     }).then((body) => {
       res.write(body)
       res.end()
@@ -157,9 +160,8 @@ function start (id) {
     const source = req.params.source
     const path = req.params[0]
     const color = req.query.color || 'brightgreen'
-    const options = {
-      gzip: req.query.gzip === 'true'
-    }
+    const options = { gzip: req.query.gzip === 'true' }
+    const query = { style: req.query.style }
     let url
     // Express' path-to-regexp business is too insane to easily do this above.
     if (path.match(/^\w/)) {
@@ -171,10 +173,10 @@ function start (id) {
     }
     const label = req.query.label || (options.gzip ? 'size (gzip)' : 'size')
     getFileSize(url, options).then((size) => {
-      return getShieldsBadge(label, size, color)
+      return getShieldsBadge(label, size, color, query)
     }).catch((err) => {
       console.error(`Error: ${err}`)
-      return getShieldsBadge(label, 'error', 'lightgrey')
+      return getShieldsBadge(label, 'error', 'lightgrey', query)
     }).then((body) => {
       res.write(body)
       res.end()
