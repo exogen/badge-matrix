@@ -84,6 +84,8 @@ Deployed at `https://badges.herokuapp.com/`
 
     `versionDivider`
 
+    `style`
+
     Same as the `/sauce/:user` endpoint below.
 * `/size/:source/:path`
 
@@ -112,6 +114,10 @@ Deployed at `https://badges.herokuapp.com/`
     defaults to **brightgreen**. Note that the default may change to **blue** in
     the future, as is somewhat conventional for purely informational,
     non-qualitative badges like this one.
+
+  * `style`
+
+    Style to pass along to [shields.io](http://shields.io/).
 * `/sauce/:user`
 
   Render browser support matrix badge for the Sauce Labs account at `:user`.
@@ -191,6 +197,13 @@ Deployed at `https://badges.herokuapp.com/`
 
     * **none** or **false**: Don’t show a divider.
     * **line** or **true**: Show a subtle beveled line between version numbers.
+  * `style`
+
+    Badge style, defaults to **flat**. Styles are inspired by
+    [shields.io](http://shields.io/).
+
+    * **flat**: Round and smooth.
+    * **flat-square**: Square and flat.
 * `/travis/:user/:repo`
 
   Render build status badge for the Travis project at `:user/:repo`, counting
@@ -212,6 +225,9 @@ Deployed at `https://badges.herokuapp.com/`
 
     Text label to render on the left side of the badge, defaults to the repo
     name.
+  * `style`
+
+    Style to pass along to [shields.io](http://shields.io/).
 * `/travis/:user/:repo/sauce/:sauceUser`
 
   Render browser support matrix badge for the Travis project at `:user/:repo`,
@@ -236,5 +252,7 @@ Deployed at `https://badges.herokuapp.com/`
     `labels`
 
     `versionDivider`
+
+    `style`
 
     Same as the `/sauce/:user` endpoint above.
