@@ -40,7 +40,9 @@ Beautiful *and* customizable!
 
 ## Web Service
 
-Deployed at `https://badges.herokuapp.com/`
+Deployed at: **`https://badges.herokuapp.com/`**
+
+You may also run your own instance using this package. See the **Deployment** section.
 
 ### Endpoints
 
@@ -256,3 +258,19 @@ Deployed at `https://badges.herokuapp.com/`
     `style`
 
     Same as the `/sauce/:user` endpoint above.
+
+## Deployment
+
+If you want to run your own instance of `badge-matrix`, clone this repo.
+
+### Heroku
+
+1. Create a Heroku app.
+2. `npm run add-font` will copy `Verdana.ttf` from wherever it is on your system.
+3. `npm run deploy` will build the sources and deploy to Heroku.
+
+### Anywhere else
+
+1. `npm run build` will build the sources.
+2. `npm run add-font` will copy `Verdana.ttf` from wherever it is on your system.
+3. `npm start` will start the server.
