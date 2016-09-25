@@ -79,6 +79,8 @@ function start (id) {
     res.set('Cache-Control', 'public, must-revalidate, max-age=30')
     res.flushHeaders()
 
+    console.log(`Incoming request from referrer: ${req.get('Referrer')}`)
+
     const user = req.params.user
     let source = req.query.source || 'svg'
     const build = req.query.build // If undefined, will try to get the latest.
@@ -106,6 +108,8 @@ function start (id) {
     res.set('Content-Type', 'image/svg+xml')
     res.set('Cache-Control', 'public, must-revalidate, max-age=30')
     res.flushHeaders()
+
+    console.log(`Incoming request from referrer: ${req.get('Referrer')}`)
 
     const user = req.params.user
     const repo = req.params.repo
@@ -139,6 +143,8 @@ function start (id) {
     res.set('Cache-Control', 'public, must-revalidate, max-age=30')
     res.flushHeaders()
 
+    console.log(`Incoming request from referrer: ${req.get('Referrer')}`)
+
     const user = req.params.user
     const repo = req.params.repo
     const sauceUser = req.params.sauceUser || user
@@ -156,6 +162,8 @@ function start (id) {
     res.set('Content-Type', 'image/svg+xml')
     res.set('Cache-Control', 'public, must-revalidate, max-age=30')
     res.flushHeaders()
+
+    console.log(`Incoming request from referrer: ${req.get('Referrer')}`)
 
     const source = req.params.source
     const path = req.params[0]
@@ -188,6 +196,8 @@ function start (id) {
     res.set('Content-Type', 'image/svg+xml')
     res.set('Cache-Control', 'public, must-revalidate, max-age=30')
     res.flushHeaders()
+
+    console.log(`Incoming request from referrer: ${req.get('Referrer')}`)
 
     let browsers = {}
     _.forEach(BROWSERS, (value, browser) => {
