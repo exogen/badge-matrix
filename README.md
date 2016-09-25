@@ -4,49 +4,70 @@ More advanced badges for your projects using Travis or Sauce Labs.
 
 [See it in action over at the `script-atomic-onload` project.](https://github.com/exogen/script-atomic-onload)
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+## Contents
+
+- [Badges](#badges)
+- [Web Service](#web-service)
+  - [Endpoints](#endpoints)
+    - [`/browsers`](#browsers)
+    - [`/sauce/:user`](#sauceuser)
+    - [`/size/:source/:path`](#sizesourcepath)
+    - [`/travis/:user/:repo`](#travisuserrepo)
+    - [`/travis/:user/:repo/sauce/:sauceUser`](#travisuserreposaucesauceuser)
+- [Deployment](#deployment)
+  - [Heroku](#heroku)
+  - [Anywhere else](#anywhere-else)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Badges
 
-#### File size badges for any file on GitHub or npm
+**File size for any file on GitHub or npm**
 
 [![Builder package.json size](https://badges.herokuapp.com/size/github/FormidableLabs/builder/master/package.json)](https://github.com/FormidableLabs/builder)
 
 [![Victory size](https://badges.herokuapp.com/size/npm/victory/dist/victory.min.js?gzip=true)](https://www.npmjs.com/package/victory)
 
+**Slice your Travis build matrix by environment**
 
-#### Status badges for slices of your Travis build matrix
 [![NPM_3=true Status](https://badges.herokuapp.com/travis/FormidableLabs/builder?env=NPM_3=true&label=NPM_3=true)](https://travis-ci.org/FormidableLabs/builder)
+
 [![NPM_3=false Status](https://badges.herokuapp.com/travis/FormidableLabs/builder?env=NPM_3=false&label=NPM_3=false)](https://travis-ci.org/FormidableLabs/builder)
 
-#### Browser matrix badges for Sauce Labs
+**Browser support matrix from Sauce Labs**
+
 [![Browser Status](https://badges.herokuapp.com/sauce/wml-little-loader)](https://saucelabs.com/u/wml-little-loader)
 
 Beautiful *and* customizable!
 
-* `labels=none`
+* `?labels=none`
 
   [![Browser Status](https://badges.herokuapp.com/sauce/wml-little-loader?labels=none)](https://saucelabs.com/u/wml-little-loader)
-* `logos=none`
+* `?logos=none`
 
   [![Browser Status](https://badges.herokuapp.com/sauce/wml-little-loader?logos=none)](https://saucelabs.com/u/wml-little-loader)
-* `logos=none&labels=longName`
+* `?logos=none&labels=longName`
 
   [![Browser Status](https://badges.herokuapp.com/sauce/wml-little-loader?logos=none&labels=longName)](https://saucelabs.com/u/wml-little-loader)
 
-#### Browser matrix badges for any service, just construct a URL!
+Using something other than Sauce Labs? Just construct a URL with results from
+your browser results.
 
 * `browsers?firefox=20,26&iexplore=!8,-9,10`
 
-![Browser Status](https://badges.herokuapp.com/browsers?firefox=20,26&iexplore=!8,-9,10)
+  ![Browser Status](https://badges.herokuapp.com/browsers?firefox=20,26&iexplore=!8,-9,10)
 
 ## Web Service
 
-Deployed at: **`https://badges.herokuapp.com/`**
+Deployed at: `https://badges.herokuapp.com/`
 
 You may also run your own instance using this package. See the **Deployment** section.
 
 ### Endpoints
 
-* `/browsers`
+#### `/browsers`
 
   Render browser matrix badge based on support specified in the query
   parameters, for cases where your testing is done with a service other than
@@ -55,20 +76,14 @@ You may also run your own instance using this package. See the **Deployment** se
 
   **Query parameters**
 
-  * `android`
-
-    `firefox`
-
-    `googlechrome`
-
-    `iexplore`
-
-    `iphone`
-
-    `microsoftedge`
-
-    `opera`
-
+  * `android`,
+    `firefox`,
+    `googlechrome`,
+    `iexplore`,
+    `ipad`,
+    `iphone`,
+    `microsoftedge`,
+    `opera`,
     `safari`
 
     A comma-separated list of version numbers that were tested for the given
@@ -79,48 +94,14 @@ You may also run your own instance using this package. See the **Deployment** se
     * **`+`** or no prefix: Passed.
     * **`-`**: Failed.
     * **`!`**: Error.
-
-  * `logos`
-
-    `labels`
-
-    `versionDivider`
-
+  * `logos`,
+    `labels`,
+    `versionDivider`,
     `style`
 
     Same as the `/sauce/:user` endpoint below.
-* `/size/:source/:path`
 
-  Render a file size badge for any file on GitHub or npm.
-
-  * `:source` can be `github` or `npm`.
-  * `:path` can be any valid `raw.githubusercontent.com` or `unpkg.com` path
-    (when `:source` is `github` or `npm`, respectively).
-
-  **Query parameters**
-
-  * `gzip`
-
-    Whether to show the gzip-compressed size, defaults to **false**.
-
-    * **true**: Show compressed size.
-    * **false**: Show uncompressed size.
-
-  * `label`
-
-    Custom badge label, by default it will be "size" or "size (gzip)".
-
-  * `color`
-
-    Color name or value to pass along to [shields.io](http://shields.io/),
-    defaults to **brightgreen**. Note that the default may change to **blue** in
-    the future, as is somewhat conventional for purely informational,
-    non-qualitative badges like this one.
-
-  * `style`
-
-    Style to pass along to [shields.io](http://shields.io/).
-* `/sauce/:user`
+#### `/sauce/:user`
 
   Render browser support matrix badge for the Sauce Labs account at `:user`.
 
@@ -201,12 +182,42 @@ You may also run your own instance using this package. See the **Deployment** se
     * **line** or **true**: Show a subtle beveled line between version numbers.
   * `style`
 
-    Badge style, defaults to **flat**. Styles are inspired by
+    Badge style, defaults to **flat**. Styles match
     [shields.io](http://shields.io/).
 
     * **flat**: Round and smooth.
     * **flat-square**: Square and flat.
-* `/travis/:user/:repo`
+
+#### `/size/:source/:path`
+
+  Render a file size badge for any file on GitHub or npm.
+
+  * `:source` can be `github` or `npm`.
+  * `:path` can be any valid `raw.githubusercontent.com` or `unpkg.com` path
+    (when `:source` is `github` or `npm`, respectively).
+
+  **Query parameters**
+
+  * `gzip`
+
+    Whether to show the gzip-compressed size, defaults to **false**.
+
+    * **true**: Show compressed size.
+    * **false**: Show uncompressed size.
+  * `label`
+
+    Custom badge label, by default it will be "size" or "size (gzip)".
+  * `color`
+
+    Color name or value to pass along to [shields.io](http://shields.io/),
+    defaults to **brightgreen**. Note that the default may change to **blue** in
+    the future, as is somewhat conventional for purely informational,
+    non-qualitative badges like this one.
+  * `style`
+
+    Style to pass along to [shields.io](http://shields.io/).
+
+#### `/travis/:user/:repo`
 
   Render build status badge for the Travis project at `:user/:repo`, counting
   only build jobs that match the given `env` filter.
@@ -230,7 +241,8 @@ You may also run your own instance using this package. See the **Deployment** se
   * `style`
 
     Style to pass along to [shields.io](http://shields.io/).
-* `/travis/:user/:repo/sauce/:sauceUser`
+
+#### `/travis/:user/:repo/sauce/:sauceUser`
 
   Render browser support matrix badge for the Travis project at `:user/:repo`,
   getting Sauce Labs results from `:sauceUser` (defaults to `:user`).
@@ -245,16 +257,11 @@ You may also run your own instance using this package. See the **Deployment** se
   * `branch`
 
     Git branch of the Travis build, defaults to **master**.
-  * `name`
-
-    `tag`
-
-    `logos`
-
-    `labels`
-
-    `versionDivider`
-
+  * `name`,
+    `tag`,
+    `logos`,
+    `labels`,
+    `versionDivider`,
     `style`
 
     Same as the `/sauce/:user` endpoint above.

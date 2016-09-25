@@ -9,7 +9,9 @@
   },
   "scripts": {
     "add-font": "./scripts/add-font.sh",
-    "build": "babel src -d lib",
+    "build": "npm run build:docs && npm run build:lib",
+    "build:docs": "doctoc --title '## Contents' README.md",
+    "build:lib": "babel src -d lib",
     "check-font": "./scripts/check-font.sh",
     "clean": "rimraf lib",
     "deploy": "./scripts/deploy.sh",
@@ -43,6 +45,7 @@
     "babel-eslint": "^6.1.2",
     "babel-preset-es2015": "^6.1.18",
     "babel-preset-stage-2": "^6.1.18",
+    "doctoc": "^1.2.0",
     "nodemon": "^1.8.1",
     "pre-commit": "^1.1.3",
     "snazzy": "^5.0.0",
