@@ -31,7 +31,7 @@
     "humanize-duration": "^3.9.1",
     "lodash": "^4.16.0",
     "lru-cache": "^4.0.1",
-    "marko": "^3.8.1",
+    "marko": "^4.2.5",
     "object-hash": "^1.1.3",
     "pdfkit": "^0.8.0",
     "pretty-bytes": "^4.0.2",
@@ -42,15 +42,15 @@
   },
   "devDependencies": {
     "babel-cli": "^6.2.0",
-    "babel-eslint": "^6.1.2",
+    "babel-eslint": "^7.2.1",
     "babel-preset-es2015": "^6.1.18",
     "babel-preset-stage-2": "^6.1.18",
     "doctoc": "^1.2.0",
     "nodemon": "^1.8.1",
     "pre-commit": "^1.1.3",
     "rimraf": "^2.5.4",
-    "snazzy": "^5.0.0",
-    "standard": "^8.0.0"
+    "snazzy": "^6.0.0",
+    "standard": "^10.0.0"
   },
   "repository": {
     "type": "git",
