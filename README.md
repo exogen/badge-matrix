@@ -1,5 +1,7 @@
 # badge-matrix
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/exogen/badge-matrix.svg)](https://greenkeeper.io/)
+
 More advanced badges for your projects using Travis or Sauce Labs.
 
 [See it in action over at the `script-atomic-onload` project.](https://github.com/exogen/script-atomic-onload)
