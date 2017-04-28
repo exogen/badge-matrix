@@ -37,6 +37,6 @@ export default function getFileSize (url, options = {}) {
       }
     }).then(prettyBytes)
   } else {
-    return Promise.reject('error')
+    return Promise.reject(new Error('error'))
   }
 }
