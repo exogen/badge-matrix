@@ -32,9 +32,9 @@ More advanced badges for your projects using Travis or Sauce Labs.
 
 **Slice your Travis build matrix by environment**
 
-[![NPM_3=true Status](https://badges.herokuapp.com/travis/FormidableLabs/builder?env=NPM_3=true&label=NPM_3=true)](https://travis-ci.org/FormidableLabs/builder)
+![TEST_LOADER=jquery](https://badges.herokuapp.com/travis/exogen/script-atomic-onload?branch=master&env=TEST_LOADER=little-loader&label=TEST_LOADER=little-loader)
 
-[![NPM_3=false Status](https://badges.herokuapp.com/travis/FormidableLabs/builder?env=NPM_3=false&label=NPM_3=false)](https://travis-ci.org/FormidableLabs/builder)
+![TEST_LOADER=little-loader](https://badges.herokuapp.com/travis/exogen/script-atomic-onload?branch=master&env=TEST_LOADER=jquery&label=TEST_LOADER=jquery)
 
 **Browser support matrix from Sauce Labs**
 
@@ -244,27 +244,27 @@ You may also run your own instance using this package. See the **Deployment** se
 
 #### `/travis/:user/:repo/sauce/:sauceUser`
 
-  Render browser support matrix badge for the Travis project at `:user/:repo`,
-  getting Sauce Labs results from `:sauceUser` (defaults to `:user`).
+Render browser support matrix badge for the Travis project at `:user/:repo`,
+getting Sauce Labs results from `:sauceUser` (defaults to `:user`).
 
-  You can also use the `/sauce/:user` endpoint, but this way ensures that we
-  only consider Sauce Labs jobs that match up with the latest Travis build
-  number for the given `branch`, and also makes the correct jobs easier to find
-  since Travis provides the time span of the build.
+You can also use the `/sauce/:user` endpoint, but this way ensures that we
+only consider Sauce Labs jobs that match up with the latest Travis build
+number for the given `branch`, and also makes the correct jobs easier to find
+since Travis provides the time span of the build.
 
-  **Query parameters**
+**Query parameters**
 
-  * `branch`
+* `branch`
 
-    Git branch of the Travis build, defaults to **master**.
-  * `name`,
-    `tag`,
-    `logos`,
-    `labels`,
-    `versionDivider`,
-    `style`
+  Git branch of the Travis build, defaults to **master**.
+* `name`,
+  `tag`,
+  `logos`,
+  `labels`,
+  `versionDivider`,
+  `style`
 
-    Same as the `/sauce/:user` endpoint above.
+  Same as the `/sauce/:user` endpoint above.
 
 ## Deployment
 
