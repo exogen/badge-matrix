@@ -172,7 +172,7 @@ function start (id) {
     const query = { style: req.query.style }
     let url
     // Express' path-to-regexp business is too insane to easily do this above.
-    if (path.match(/^\w/)) {
+    if (path.length > 0) {
       if (source === 'github') {
         url = `https://raw.githubusercontent.com/${path}`
       } else if (source === 'npm') {
