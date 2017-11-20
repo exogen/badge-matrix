@@ -4,8 +4,8 @@
   "description": "More advanced badges for your projects using Travis or Sauce Labs.",
   "main": "lib/index.js",
   "engines": {
-    "node": "6.5.x",
-    "npm": "3.10.x"
+    "node": ">=6.5.0",
+    "npm": ">=3.10.0"
   },
   "scripts": {
     "add-font": "./scripts/add-font.sh",
