@@ -1,6 +1,5 @@
 import cachedRequest, { ONE_HOUR, ONE_MINUTE } from './cached-request'
 import prettyBytes from 'pretty-bytes'
-import gzipSize from 'gzip-size'
 
 export default function getFileSize (url, options = {}) {
   if (url) {
@@ -9,31 +8,19 @@ export default function getFileSize (url, options = {}) {
     // and caching potentially large files.
     return cachedRequest(url, {
       method: 'HEAD',
+      size: true,
       gzip: options.gzip
-    }, ONE_MINUTE).then((headers) => {
-      let bytes
-      if (!options.gzip || headers['content-encoding'] === 'gzip') {
-        bytes = headers['content-length']
-      }
-      if (bytes) {
-        return parseInt(bytes, 10)
+    }, ONE_MINUTE).then((bytes) => {
+      if (bytes != null) {
+        return bytes
       } else {
-        console.log('No Content-Length in HEAD response; fetching body.')
-        return cachedRequest(url, { gzip: true }, ONE_HOUR).then((body) => {
-          if (options.gzip) {
-            return new Promise((resolve, reject) => {
-              gzipSize(body, (err, size) => {
-                if (err) {
-                  reject(err)
-                } else {
-                  resolve(size)
-                }
-              })
-            })
-          } else {
-            return body.length
-          }
-        })
+        console.log('Could not determine size from HEAD request; fetching body.')
+        return cachedRequest(url, {
+          size: true,
+          // Always gzip, even if we're not returning the gzip size, so that we
+          // can receive the body faster.
+          gzip: true
+        }, ONE_HOUR)
       }
     }).then(prettyBytes)
   } else {

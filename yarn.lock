@@ -1951,11 +1951,12 @@ graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.4:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/graceful-readlink/-/graceful-readlink-1.0.1.tgz#4cafad76bc62f02fa039b2f94e9a3dd3a391a725"
 
-gzip-size@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/gzip-size/-/gzip-size-3.0.0.tgz#546188e9bdc337f673772f81660464b389dce520"
+gzip-size@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/gzip-size/-/gzip-size-4.0.0.tgz#a80e13e18938bcb2e6702fec606f5cf8b666db3a"
   dependencies:
     duplexer "^0.1.1"
+    pify "^3.0.0"
 
 har-schema@^1.0.5:
   version "1.0.5"
@@ -2916,6 +2917,10 @@ performance-now@^0.2.0:
 pify@^2.0.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/pify/-/pify-2.3.0.tgz#ed141a6ac043a849ea588498e7dca8b15330e90c"
+
+pify@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/pify/-/pify-3.0.0.tgz#e5a4acd2c101fdf3d9a4d07f0dbc4db49dd28176"
 
 pinkie-promise@^2.0.0:
   version "2.0.1"
