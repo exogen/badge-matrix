@@ -119,7 +119,27 @@ function start (id) {
     const query = { style: req.query.style }
     travis.getLatestBranchBuild(branch).then((build) => {
       const filters = {
-        env: req.query.env
+        compiler: req.query.compiler,
+        d: req.query.d,
+        dart: req.query.dart,
+        dotnet: req.query.dotnet,
+        elixir: req.query.elixir,
+        env: req.query.env,
+        gemfile: req.query.gemfile,
+        go: req.query.go,
+        jdk: req.query.jdk,
+        mono: req.query.mono,
+        node_js: req.query.node_js,
+        os: req.query.os,
+        osx_image: req.query.osx_image,
+        otp_release: req.query.otp_release,
+        php: req.query.php,
+        python: req.query.python,
+        rust: req.query.rust,
+        rvm: req.query.rvm,
+        scala: req.query.scala,
+        xcode_scheme: req.query.xcode_scheme,
+        xcode_sdk: req.query.xcode_sdk
       }
       const jobs = travis.filterJobs(build.jobs, filters)
       const status = travis.aggregateStatus(jobs)
