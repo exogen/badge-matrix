@@ -2,13 +2,14 @@ import querystring from 'querystring'
 import LRU from 'lru-cache'
 import cachedRequest, { ONE_HOUR, ONE_DAY } from './cached-request'
 
+const TRAVIS_ENDPOINT = process.env.TRAVIS_ENDPOINT || 'https://api.travis-ci.org'
 const BRANCH_CACHE = LRU({ max: 256, maxAge: 30 * ONE_DAY })
 
 export default class TravisClient {
   constructor (user, repo) {
     this.user = user
     this.repo = repo
-    this.baseURL = `https://api.travis-ci.org/repos/${user}/${repo}`
+    this.baseURL = `${TRAVIS_ENDPOINT}/repos/${user}/${repo}`
   }
 
   getURL (path, query) {
@@ -27,7 +28,7 @@ export default class TravisClient {
   get (path, query, customTTL) {
     const url = this.getURL(path, query)
     const options = {
-      headers: { Accept: 'application/vnd.travis-ci.2+json' },
+      headers: { Accept: 'application/vnd.travis-ci.2.1+json' },
       json: true,
       gzip: true
     }
