@@ -9,7 +9,11 @@ function start (id) {
   const _ = require('lodash')
   const express = require('express')
   const compression = require('compression')
-  const { default: TravisClient } = require('./travis')
+  const {
+    default: TravisClient,
+    TRAVIS_COM_ENDPOINT,
+    TRAVIS_ORG_ENDPOINT
+  } = require('./travis')
   const { default: SauceClient } = require('./sauce')
   const { default: getShieldsBadge } = require('./shields')
   const { default: getBrowsersBadge, BROWSERS, getGroupedBrowsers } = require('./browsers')
@@ -103,6 +107,20 @@ function start (id) {
     return handleSauceBadge(req, res, sauce, source, jobs)
   })
 
+  // Rewrite `/travis.com` and `/travis.org` URLs to `/travis` while setting
+  // `res.locals.travisEndpoint`.
+  app.get('/travis.com/*', (req, res, next) => {
+    req.url = `/travis/${req.params[0]}`
+    res.locals.travisEndpoint = TRAVIS_COM_ENDPOINT
+    next()
+  })
+
+  app.get('/travis.org/*', (req, res, next) => {
+    req.url = `/travis/${req.params[0]}`
+    res.locals.travisEndpoint = TRAVIS_ORG_ENDPOINT
+    next()
+  })
+
   app.get('/travis/:user/:repo', (req, res) => {
     res.status(200)
     res.set('Content-Type', 'image/svg+xml')
@@ -113,9 +131,10 @@ function start (id) {
 
     const user = req.params.user
     const repo = req.params.repo
+    const endpoint = res.locals.travisEndpoint || undefined
     const branch = req.query.branch || 'master'
     const label = req.query.label || req.params.repo
-    const travis = new TravisClient(user, repo)
+    const travis = new TravisClient(user, repo, endpoint)
     const query = { style: req.query.style }
     travis.getLatestBranchBuild(branch).then((build) => {
       const filters = {
@@ -147,9 +166,10 @@ function start (id) {
 
     const user = req.params.user
     const repo = req.params.repo
+    const endpoint = res.locals.travisEndpoint || undefined
     const sauceUser = req.params.sauceUser || user
     const branch = req.query.branch || 'master'
-    const travis = new TravisClient(user, repo)
+    const travis = new TravisClient(user, repo, endpoint)
     const sauce = new SauceClient(sauceUser)
     const jobs = travis.getLatestBranchBuild(branch).then((build) => {
       return sauce.getTravisBuildJobs(build)
