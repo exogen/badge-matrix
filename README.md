@@ -69,178 +69,183 @@ You may also run your own instance using this package. See the **Deployment** se
 
 #### `/browsers`
 
-  Render browser matrix badge based on support specified in the query
-  parameters, for cases where your testing is done with a service other than
-  Sauce Labs (otherwise use the `/sauce` endpoint), or you don’t have CI and
-  just want to show your intended support.
+Render browser matrix badge based on support specified in the query
+parameters, for cases where your testing is done with a service other than
+Sauce Labs (otherwise use the `/sauce` endpoint), or you don’t have CI and
+just want to show your intended support.
 
-  **Query parameters**
+**Query parameters**
 
-  * `android`,
-    `firefox`,
-    `googlechrome`,
-    `iexplore`,
-    `ipad`,
-    `iphone`,
-    `microsoftedge`,
-    `opera`,
-    `safari`
+* `android`,
+  `firefox`,
+  `googlechrome`,
+  `iexplore`,
+  `ipad`,
+  `iphone`,
+  `microsoftedge`,
+  `opera`,
+  `safari`
 
-    A comma-separated list of version numbers that were tested for the given
-    browser, e.g. `firefox=20,26`.
+  A comma-separated list of version numbers that were tested for the given
+  browser, e.g. `firefox=20,26`.
 
-    Prefix a version number to indicate status:
+  Prefix a version number to indicate status:
 
-    * **`+`** or no prefix: Passed.
-    * **`-`**: Failed.
-    * **`!`**: Error.
-  * `logos`,
-    `labels`,
-    `versionDivider`,
-    `style`
+  * **`+`** or no prefix: Passed.
+  * **`-`**: Failed.
+  * **`!`**: Error.
+* `logos`,
+  `labels`,
+  `versionDivider`,
+  `style`
 
-    Same as the `/sauce/:user` endpoint below.
+  Same as the `/sauce/:user` endpoint below.
 
 #### `/sauce/:user`
 
-  Render browser support matrix badge for the Sauce Labs account at `:user`.
+Render browser support matrix badge for the Sauce Labs account at `:user`.
 
-  **Query parameters**
+**Query parameters**
 
-  * `build`
+* `build`
 
-    Build number, it should match the `build` string of one or more jobs. By
-    default, try to find the most recent build. The build can be from any CI
-    service, not just Travis.
+  Build number, it should match the `build` string of one or more jobs. By
+  default, try to find the most recent build. The build can be from any CI
+  service, not just Travis.
 
-    Sauce Labs’ API doesn’t allow filtering by build, so finding the jobs for a
-    build can be a bit of a hassle:
+  Sauce Labs’ API doesn’t allow filtering by build, so finding the jobs for a
+  build can be a bit of a hassle:
 
-    * If the requested build is not in the first 500 results returned by the
-      API, then you should specify `from` and `to` to limit the query window
-      to the time span of the build.
-    * If no `from` is given, then stop fetching more jobs from the API when a
-      different build number is encountered.
+  * If the requested build is not in the first 500 results returned by the
+    API, then you should specify `from` and `to` to limit the query window
+    to the time span of the build.
+  * If no `from` is given, then stop fetching more jobs from the API when a
+    different build number is encountered.
 
-    Jobs with a `null` value for `build` are never included.
-  * `name`
+  Jobs with a `null` value for `build` are never included.
+* `name`
 
-    Name filter, it should match a whitespace separated substring in the `name`
-    of one or more jobs. Only jobs matching the filter will be included in the
-    result.
-  * `tag`
+  Name filter, it should match a whitespace separated substring in the `name`
+  of one or more jobs. Only jobs matching the filter will be included in the
+  result.
+* `tag`
 
-    Tag filter, it should match a string in the `tags` array of one or more
-    jobs. Only jobs matching the filter will be included in the result.
-  * `from`
+  Tag filter, it should match a string in the `tags` array of one or more
+  jobs. Only jobs matching the filter will be included in the result.
+* `from`
 
-    Start time (Unix epoch) of the window in which to find jobs. Passed along
-    to the Sauce Labs API.
-  * `to`
+  Start time (Unix epoch) of the window in which to find jobs. Passed along
+  to the Sauce Labs API.
+* `to`
 
-    End time (Unix epoch) of the window in which to find jobs. Passed along to
-    the Sauce Labs API.
-  * `skip`
+  End time (Unix epoch) of the window in which to find jobs. Passed along to
+  the Sauce Labs API.
+* `skip`
 
-    Number of initial jobs to skip. Passed along to the Sauce Labs API.
-  * `source`
+  Number of initial jobs to skip. Passed along to the Sauce Labs API.
+* `source`
 
-    Data source from which to render results, defaults to `svg`.
+  Data source from which to render results, defaults to `svg`.
 
-    * **api**: Fetch results from the Sauce Labs API. This allows you to specify
-      any of the above query parameters for filtering jobs.
-    * **svg**: Fetch Sauce Labs’ own browser matrix SVG widget and transform it
-      into our slimmer, beautified version. If you aren’t using any of the
-      options above, and just want the same results as their own widget would
-      render, use this. If you try specifying any of the options above, the
-      server will automatically change `source` to `api`. This is probably much
-      faster than talking to the API, but it’s a bit more fragile since their
-      SVG output could change.
-  * `logos`
+  * **api**: Fetch results from the Sauce Labs API. This allows you to specify
+    any of the above query parameters for filtering jobs.
+  * **svg**: Fetch Sauce Labs’ own browser matrix SVG widget and transform it
+    into our slimmer, beautified version. If you aren’t using any of the
+    options above, and just want the same results as their own widget would
+    render, use this. If you try specifying any of the options above, the
+    server will automatically change `source` to `api`. This is probably much
+    faster than talking to the API, but it’s a bit more fragile since their
+    SVG output could change.
+* `logos`
 
-    How to render browser logos, defaults to **inside**.
+  How to render browser logos, defaults to **inside**.
 
-    * **inside** or **true**: Show logos in the label part of the badge.
-    * **none** or **false**: Don’t show logos.
-  * `labels`
+  * **inside** or **true**: Show logos in the label part of the badge.
+  * **none** or **false**: Don’t show logos.
+* `labels`
 
-    How to render browser labels, defaults to **shortName**.
+  How to render browser labels, defaults to **shortName**.
 
-    * **shortName** or **true**: Short names, e.g. "Chrome", "FF", "IE".
-    * **name**: Medium names, e.g. "Chrome", "Firefox", "Internet Explorer".
-    * **longName**: Long names, e.g. "Google Chrome", "Mozilla Firefox",
-      "Microsoft Internet Explorer".
-    * **sauceName**: Browser identifiers used by Sauce Labs, e.g.
-      "googlechrome", "firefox", "iexplore".
-    * **none** or **false**: Don’t show labels.
-  * `versionDivider`
+  * **shortName** or **true**: Short names, e.g. "Chrome", "FF", "IE".
+  * **name**: Medium names, e.g. "Chrome", "Firefox", "Internet Explorer".
+  * **longName**: Long names, e.g. "Google Chrome", "Mozilla Firefox",
+    "Microsoft Internet Explorer".
+  * **sauceName**: Browser identifiers used by Sauce Labs, e.g.
+    "googlechrome", "firefox", "iexplore".
+  * **none** or **false**: Don’t show labels.
+* `versionDivider`
 
-    How to render the divider between browser version numbers, defaults to
-    **none**.
+  How to render the divider between browser version numbers, defaults to
+  **none**.
 
-    * **none** or **false**: Don’t show a divider.
-    * **line** or **true**: Show a subtle beveled line between version numbers.
-  * `style`
+  * **none** or **false**: Don’t show a divider.
+  * **line** or **true**: Show a subtle beveled line between version numbers.
+* `style`
 
-    Badge style, defaults to **flat**. Styles match
-    [shields.io](http://shields.io/).
+  Badge style, defaults to **flat**. Styles match
+  [shields.io](http://shields.io/).
 
-    * **flat**: Round and smooth.
-    * **flat-square**: Square and flat.
+  * **flat**: Round and smooth.
+  * **flat-square**: Square and flat.
 
 #### `/size/:source/:path`
 
-  Render a file size badge for any file on GitHub or npm.
+Render a file size badge for any file on GitHub or npm.
 
-  * `:source` can be `github` or `npm`.
-  * `:path` can be any valid `raw.githubusercontent.com` or `unpkg.com` path
-    (when `:source` is `github` or `npm`, respectively).
+* `:source` can be `github` or `npm`.
+* `:path` can be any valid `raw.githubusercontent.com` or `unpkg.com` path
+  (when `:source` is `github` or `npm`, respectively).
 
-  **Query parameters**
+**Query parameters**
 
-  * `gzip`
+* `gzip`
 
-    Whether to show the gzip-compressed size, defaults to **false**.
+  Whether to show the gzip-compressed size, defaults to **false**.
 
-    * **true**: Show compressed size.
-    * **false**: Show uncompressed size.
-  * `label`
+  * **true**: Show compressed size.
+  * **false**: Show uncompressed size.
+* `label`
 
-    Custom badge label, by default it will be "size" or "size (gzip)".
-  * `color`
+  Custom badge label, by default it will be "size" or "size (gzip)".
+* `color`
 
-    Color name or value to pass along to [shields.io](http://shields.io/),
-    defaults to **brightgreen**. Note that the default may change to **blue** in
-    the future, as is somewhat conventional for purely informational,
-    non-qualitative badges like this one.
-  * `style`
+  Color name or value to pass along to [shields.io](http://shields.io/),
+  defaults to **brightgreen**. Note that the default may change to **blue** in
+  the future, as is somewhat conventional for purely informational,
+  non-qualitative badges like this one.
+* `style`
 
-    Style to pass along to [shields.io](http://shields.io/).
+  Style to pass along to [shields.io](http://shields.io/).
 
 #### `/travis/:user/:repo`
 
-  Render build status badge for the Travis project at `:user/:repo`, counting
-  only build jobs that match the given `env` filter.
+Render build status badge for the Travis project at `:user/:repo`, counting
+only build jobs that match the given `env` filter.
 
-  **Query parameters**
+The default endpoint used to communicate with the Travis API is determined by
+the server’s `TRAVIS_ENDPOINT` environment variable. You can force the public
+`api.travis-ci.com` or `api.travis-ci.org` endpoints by beginning the URL with
+`/travis.com` or `/travis.org`, respectively.
 
-  * `branch`
+**Query parameters**
 
-    Git branch, defaults to **master**.
-  * `env`
+* `branch`
 
-    Environment filter, it should match a `VAR=value` line in the `env`
-    section of your build matrix. All jobs in the build matching the filter
-    will be aggregated into one final status, similar to how Travis determines
-    an overall build status. If no filter is given, all jobs in the build are
-    included (even if they are Allowed Failures).
-  * `label`
+  Git branch, defaults to **master**.
+* `env`
 
-    Text label to render on the left side of the badge, defaults to the repo
-    name.
-  * `style`
+  Environment filter, it should match a `VAR=value` line in the `env`
+  section of your build matrix. All jobs in the build matching the filter
+  will be aggregated into one final status, similar to how Travis determines
+  an overall build status. If no filter is given, all jobs in the build are
+  included (even if they are Allowed Failures).
+* `label`
 
-    Style to pass along to [shields.io](http://shields.io/).
+  Text label to render on the left side of the badge, defaults to the repo
+  name.
+* `style`
+
+  Style to pass along to [shields.io](http://shields.io/).
 
 #### `/travis/:user/:repo/sauce/:sauceUser`
 
@@ -251,6 +256,11 @@ You can also use the `/sauce/:user` endpoint, but this way ensures that we
 only consider Sauce Labs jobs that match up with the latest Travis build
 number for the given `branch`, and also makes the correct jobs easier to find
 since Travis provides the time span of the build.
+
+The default endpoint used to communicate with the Travis API is determined by
+the server’s `TRAVIS_ENDPOINT` environment variable. You can force the public
+`api.travis-ci.com` or `api.travis-ci.org` endpoints by beginning the URL with
+`/travis.com` or `/travis.org`, respectively.
 
 **Query parameters**
 

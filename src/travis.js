@@ -2,13 +2,17 @@ import querystring from 'querystring'
 import LRU from 'lru-cache'
 import cachedRequest, { ONE_HOUR, ONE_DAY } from './cached-request'
 
+export const TRAVIS_COM_ENDPOINT = 'https://api.travis-ci.com'
+export const TRAVIS_ORG_ENDPOINT = 'https://api.travis-ci.org'
+const TRAVIS_ENDPOINT = process.env.TRAVIS_ENDPOINT || TRAVIS_ORG_ENDPOINT
 const BRANCH_CACHE = LRU({ max: 256, maxAge: 30 * ONE_DAY })
 
 export default class TravisClient {
-  constructor (user, repo) {
+  constructor (user, repo, endpoint = TRAVIS_ENDPOINT) {
     this.user = user
     this.repo = repo
-    this.baseURL = `https://api.travis-ci.org/repos/${user}/${repo}`
+    this.endpoint = endpoint
+    this.baseURL = `${endpoint}/repos/${user}/${repo}`
   }
 
   getURL (path, query) {
@@ -27,7 +31,7 @@ export default class TravisClient {
   get (path, query, customTTL) {
     const url = this.getURL(path, query)
     const options = {
-      headers: { Accept: 'application/vnd.travis-ci.2+json' },
+      headers: { Accept: 'application/vnd.travis-ci.2.1+json' },
       json: true,
       gzip: true
     }
@@ -70,7 +74,7 @@ export default class TravisClient {
     // with the branch itself. If it's still the same, then we'll have already
     // fetched the build we need. If not, no biggie, we just made an extra
     // parallel request and now the new build ID is cached for next time.
-    const key = `${this.user}/${this.repo}/${branch}`
+    const key = `${this.endpoint}/${this.user}/${this.repo}/${branch}`
     const cachedBranchID = BRANCH_CACHE.get(key)
     let cachedBranch
     if (cachedBranchID != null) {
