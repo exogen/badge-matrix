@@ -90,15 +90,41 @@ export default class TravisClient {
     })
   }
 
+  matchesStringFilter (actual, expected) {
+    return !expected || (actual == expected)
+  }
+
+  matchesRegexFilter (actual, expectedRegex) {
+    return !expectedRegex || expectedRegex.test(actual)
+  }
+
   filterJobs (jobs, filters = {}) {
-    const { env } = filters
-    const envRegex = env && new RegExp(`(^| )${env}( |$)`)
+    const envRegex = filters.env && new RegExp(`(^| )${filters.env}( |$)`)
     return jobs.filter((job) => {
-      const jobEnv = job.config.env || ''
-      if (envRegex && (!jobEnv || !envRegex.test(jobEnv))) {
-        return false
-      }
-      return true
+      return (
+        matchesStringFilter(job.config.compiler, filters.compiler) &&
+        matchesStringFilter(job.config.d, filters.d) &&
+        matchesStringFilter(job.config.dart, filters.dart) &&
+        matchesStringFilter(job.config.dotnet, filters.dotnet) &&
+        matchesStringFilter(job.config.elixir, filters.elixir) &&
+        matchesRegexFilter(job.config.env, envRegex) &&
+        matchesStringFilter(job.config.gemfile, filters.gemfile) &&
+        matchesStringFilter(job.config.go, filters.go) &&
+        matchesStringFilter(job.config.jdk, filters.jdk) &&
+        matchesStringFilter(job.config.mono, filters.mono) &&
+        matchesStringFilter(job.config.node_js, filters.node_js) &&
+        matchesStringFilter(job.config.os, filters.os) &&
+        matchesStringFilter(job.config.osx_image, filters.osx_image) &&
+        matchesStringFilter(job.config.otp_release, filters.otp_release) &&
+        matchesStringFilter(job.config.php, filters.php) &&
+        matchesStringFilter(job.config.python, filters.python) &&
+        matchesStringFilter(job.config.rust, filters.rust) &&
+        matchesStringFilter(job.config.rvm, filters.rvm) &&
+        matchesStringFilter(job.config.scala, filters.scala) &&
+        matchesStringFilter(job.config.xcode_scheme, filters.xcode_scheme) &&
+        matchesStringFilter(job.config.xcode_sdk, filters.xcode_sdk) &&
+        true
+      )
     })
   }
 
